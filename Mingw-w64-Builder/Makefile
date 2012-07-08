@@ -4,7 +4,8 @@
 # Contact: Varphone Wong, varphone@qq.com
 # 
 
-host := i686-pc-linux-gnu
+build := i686-pc-linux-gnu
+host := $(build)
 target := i686-w64-mingw32
 
 top_dir := $(shell pwd)
@@ -19,36 +20,47 @@ binutils_PKG := $(binutils).tar.bz2
 binutils_GET := wget http://ftp.gnu.org/gnu/binutils/$(binutils_PKG) -O packages/$(binutils_PKG)
 binutils_CFG := ../../source/$(binutils)/configure\
 	--target=$(target) --disable-multilib\
-	--with-sysroot=$(target_dir) --prefix=$(target_dir)
+	--disable-static --enable-shared --enable-lto --enable-cloog-backend=isl\
+	--disable-ppl-version-check --disable-cloog-version-check\
+	--with-sysroot=$(target_dir) --prefix=$(target_dir)\
+	--with-gmp=$(stage_dir) --with-mpfr=$(stage_dir) --with-mpc=$(stage_dir)\
+	--with-ppl=$(stage_dir) --with-cloog=$(stage_dir)
 
 gcc := gcc-4.7.1
 gcc_PKG := $(gcc).tar.bz2
 gcc_GET := wget http://ftp.gnu.org/gnu/gcc/$(gcc)/$(gcc_PKG) -O packages/$(gcc_PKG)
-gcc_CFG :=
-gcc-core_CFG := ../../source/$(gcc)/configure\
-	--target=$(target) --disable-multilib\
+gcc_CFG := LDFLAGS="-Wl,-rpath,\$$ORIGIN:\$$ORIGIN/..lib" ../../source/$(gcc)/configure\
+	--target=$(target) --disable-multilib --enable-languages=c,c++\
 	--with-sysroot=$(target_dir) --prefix=$(target_dir)\
 	--with-gmp=$(stage_dir) --with-mpfr=$(stage_dir) --with-mpc=$(stage_dir)
+gcc-core_CFG := LDFLAGS="-Wl,-rpath,\$$ORIGIN:\$$ORIGIN/..lib" ../../source/$(gcc)/configure\
+	--target=$(target) --disable-multilib --enable-languages=c,c++\
+	--disable-ppl-version-check --disable-cloog-version-check\
+	--enable-lto --enable-cloog-backend=isl\
+	--with-sysroot=$(target_dir) --prefix=$(target_dir)\
+	--with-gmp=$(stage_dir) --with-mpfr=$(stage_dir) --with-mpc=$(stage_dir)\
+	--with-ppl=$(stage_dir) --with-cloog=$(stage_dir)
 
 gmp := gmp-5.0.5
 gmp_PKG := $(gmp).tar.bz2
 gmp_GET := wget http://ftp.gnu.org/gnu/gmp/$(gmp_PKG) -O packages/$(gmp_PKG)
 gmp_CFG := ../../source/$(gmp)/configure\
-	--build=$(host) --prefix=$(stage_dir)\
+	--build=$(build) --host=$(host) --prefix=$(stage_dir)\
 	--disable-static --enable-shared --enable-cxx
 
 mpfr := mpfr-3.1.1
 mpfr_PKG := $(mpfr).tar.bz2
 mpfr_GET := wget http://www.mpfr.org/mpfr-current/$(mpfr_PKG) -O packages/$(mpfr_PKG)
 mpfr_CFG := ../../source/$(mpfr)/configure\
-	--build=$(host) --prefix=$(stage_dir)\
-	--disable-static --enable-shared --with-gmp=$(stage_dir)
+	--build=$(build) --host=$(host) --prefix=$(stage_dir)\
+	--disable-static --enable-shared --enable-thread-safe\
+	--with-gmp=$(stage_dir)
 
 mpc := mpc-0.9
 mpc_PKG := $(mpc).tar.gz
 mpc_GET := wget http://www.multiprecision.org/mpc/download/$(mpc_PKG) -O packages/$(mpc_PKG)
 mpc_CFG := ../../source/$(mpc)/configure\
-	--build=$(host) --prefix=$(stage_dir)\
+	--build=$(build) --host=$(host) --prefix=$(stage_dir)\
 	--disable-static --enable-shared\
 	--with-gmp=$(stage_dir) --with-mpfr=$(stage_dir)
 
@@ -56,7 +68,7 @@ isl := isl-0.10
 isl_PKG := $(isl).tar.bz2
 isl_GET := wget ftp://gcc.gnu.org/pub/gcc/infrastructure/$(isl_PKG) -O packages/$(isl_PKG)
 isl_CFG := ../../source/$(isl)/configure\
-	--build=$(host) --prefix=$(stage_dir)\
+	--build=$(build) --host=$(host) --prefix=$(stage_dir)\
 	--disable-static --enable-shared\
 	--with-gmp=system --with-gmp-prefix=$(stage_dir)
 
@@ -64,23 +76,24 @@ cloog := cloog-0.17.0
 cloog_PKG := $(cloog).tar.gz
 cloog_GET := wget ftp://gcc.gnu.org/pub/gcc/infrastructure/$(cloog_PKG) -O packages/$(cloog_PKG)
 cloog_CFG := ../../source/$(cloog)/configure\
-	--build=$(host) --prefix=$(stage_dir)\
+	--build=$(build) --host=$(host) --prefix=$(stage_dir)\
 	--disable-static --enable-shared\
+	--with-gmp=system --with-gmp-prefix=$(stage_dir)\
 	--with-isl=system --with-isl-prefix=$(stage_dir)
 
 ppl := ppl-1.0
 ppl_PKG := $(ppl).tar.bz2
 ppl_GET := wget http://bugseng.com/products/ppl/download/ftp/releases/1.0/$(ppl_PKG) -O packages/$(ppl_PKG)
 ppl_CFG := ../../source/$(ppl)/configure\
-	--build=$(host) --prefix=$(stage_dir)\
-	--disable-static --enable-shared\
+	--build=$(build) --host=$(host) --prefix=$(stage_dir)\
+	--disable-static --enable-shared --enable-pch --disable-documentation\
 	--with-gmp=$(stage_dir) 
 
 cloog-ppl := cloog-ppl-0.15.11
 cloog-ppl_PKG := $(cloog-ppl).tar.gz
 cloog-ppl_GET := wget ftp://gcc.gnu.org/pub/gcc/infrastructure/$(cloog-ppl_PKG) -O packages/$(cloog-ppl_PKG)
 cloog-ppl_CFG := ../../source/$(cloog-ppl)/configure\
-	--build=$(host) --prefix=$(stage_dir)\
+	--build=$(build) --host=$(host) --prefix=$(stage_dir)\
 	--disable-static --enable-shared\
 	--with-gmp=$(stage_dir) --with-ppl=$(stage_dir)\
 	--with-host-libstdcxx="-lstdc++"
@@ -89,7 +102,7 @@ polylib := polylib-5.22.5
 polylib_PKG := $(polylib).tar.gz
 polylib_GET := wget http://icps.u-strasbg.fr/polylib/polylib_src/$(polylib_PKG) -O packages/$(polylib_PKG)
 polylib_CFG := ../../source/$(polylib)/configure\
-	--build=$(host) --prefix=$(stage_dir)\
+	--build=$(build) --host=$(host) --prefix=$(stage_dir)\
 	--disable-static --enable-shared\
 	--enable-int-lib --enable-longint-lib --enable-longlongint-lib
 
@@ -97,10 +110,14 @@ mingw-w64 := mingw-w64-latest
 mingw-w64_PKG := $(mingw-w64).tar.gz
 mingw-w64_GET := wget http://mingw-w64.svn.sourceforge.net/viewvc/mingw-w64/trunk/?view=tar -O packages/$(mingw-w64_PKG)
 mingw-w64_CFG := ../../source/$(mingw-w64)/configure\
-	--build=i$(host) --host=$(target)\
-	--prefix=$(target_dir)
-mingw-w64-headers_CFG := ../../source/$(mingw-w64)/configure\
-	--build=$(host) --host=$(target) --prefix=$(target_dir)
+	--host=$(target)\
+	--with-sysroot=$(target_dir) --prefix=$(target_dir)\
+	--without-headers --with-libraries=no --with-tools=no
+mingw-w64-crt_CFG := ../../../source/$(mingw-w64)/mingw-w64-crt/configure\
+	--host=$(target) --with-sysroot=$(target_dir) --prefix=$(target_dir)
+mingw-w64-headers_CFG := ../../../source/$(mingw-w64)/mingw-w64-headers/configure\
+	--build=$(build) --host=$(target)\
+	--prefix=$(target_dir)/$(target)
 
 ###############################################################################
 ### rules
@@ -171,19 +188,31 @@ gcc-core_cfg:
 ###############################################################################
 mingw-w64:
 	cd build/$(mingw-w64) || exit 1;\
-	make && make install-strip;
+	make && make install;
 
-mingw-w64_CFG:
-	@[ -d "source/$(mingw-w64)" ] || (tar jxvf packages/$(mingw-w64_PKG) -Csource && [ -d "source/trunk" ] && mv source/trunk source/$(mingw-w64))
+mingw-w64_cfg:
+	@[ -d "source/$(mingw-w64)" ] || (tar xvf packages/$(mingw-w64_PKG) -Csource && [ -d "source/trunk" ] && mv source/trunk source/$(mingw-w64))
 	@[ -d "source/$(mingw-w64)" ] || svn co http://mingw-w64.svn.sourceforge.net/svnroot/mingw-w64/trunk source/mingw-w64
 	@[ ! -d "source/$(mingw-w64)/.svn" ] || (cd source/$(mingw-w64); svn up)
 	@[ -d "build/$(mingw-w64)" ] || mkdir -p build/$(mingw-w64)
 	cd build/$(mingw-w64) || exit 1;\
 	$(mingw-w64_CFG);
 
+mingw-w64-crt:
+	cd build/$(mingw-w64)/mingw-w64-crt || exit 1;\
+	make && make install;
+
+mingw-w64-crt_cfg:
+	@[ -d "source/$(mingw-w64)" ] || (tar xvf packages/$(mingw-w64_PKG) -Csource && [ -d "source/trunk" ] && mv source/trunk source/$(mingw-w64))
+	@[ -d "source/$(mingw-w64)" ] || svn co http://mingw-w64.svn.sourceforge.net/svnroot/mingw-w64/trunk source/mingw-w64
+	@[ ! -d "source/$(mingw-w64)/.svn" ] || (cd source/$(mingw-w64); svn up)
+	@[ -d "build/$(mingw-w64)/mingw-w64-crt" ] || mkdir -p build/$(mingw-w64)/mingw-w64-crt
+	cd build/$(mingw-w64)/mingw-w64-crt || exit 1;\
+	$(mingw-w64-crt_CFG);
+
 mingw-w64-headers:
-	cd build$(mingw-w64)/mingw-w64-headers;\
-	make && make install-strip;
+	cd build/$(mingw-w64)/mingw-w64-headers || exit 1;\
+	make install;
 
 mingw-w64-headers_cfg:
 	@[ -d "build/$(mingw-w64)/mingw-w64-headers" ] || mkdir -p build/$(mingw-w64)/mingw-w64-headers
@@ -300,4 +329,17 @@ polylib_cfg:
 install:
 	$(MAKE) -C build/$(binutils) $@
 	$(MAKE) -C build/$(mingw-w64) $@
+
+patch-rpath:
+	@for f in $(target)/bin/*; do \
+		[ -n "$$(chrpath $${f} 2> /dev/null | grep "$(top_dir)")" ] && (chrpath -r \$$ORIGIN:\$$ORIGIN/../lib $${f} > /dev/null && echo patch $${f}) || echo skip $${f}; \
+	done
+
+package: patch-rpath
+	[ ! -d "$(target)/$(build)/$(target)" ] || (mv -aP $(target)/$(build)/$(target)/* $(target)/; rm -rf $(target)/$(build))
+	[ ! -d "build/stage/lib" ] || cp -aP build/stage/lib/lib* $(target)/libexec/gcc/$(target)/*/
+	tar jcvf $(target)-$$(uname)-$$(date +%Y%m%d).tar.bz2 $(target)
+
+
+
 
