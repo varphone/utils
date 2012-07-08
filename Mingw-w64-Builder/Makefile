@@ -1,6 +1,6 @@
 # Mingw-w64 builder, v1.0
 #
-# Webpage: https://github.com/varphone/Mingw-w64-Builder.git
+# Webpage: https://github.com/varphone/utils.git
 # Contact: Varphone Wong, varphone@qq.com
 # 
 
@@ -11,195 +11,292 @@ top_dir := $(shell pwd)
 stage_dir := $(top_dir)/build/stage
 target_dir := $(top_dir)/$(target)
 
+###############################################################################
+### compoments defines
+###############################################################################
 binutils := binutils-2.22
-pkg_binutils := $(binutils).tar.bz2
-cfg_binutils := ../../source/$(binutils)/configure\
+binutils_PKG := $(binutils).tar.bz2
+binutils_GET := wget http://ftp.gnu.org/gnu/binutils/$(binutils_PKG) -O packages/$(binutils_PKG)
+binutils_CFG := ../../source/$(binutils)/configure\
 	--target=$(target) --disable-multilib\
 	--with-sysroot=$(target_dir) --prefix=$(target_dir)
 
 gcc := gcc-4.7.1
-pkg_gcc = $(gcc).tar.bz2
-cfg_gcc :=
-cfg_gcc-core := ../../source/$(gcc)/configure\
+gcc_PKG := $(gcc).tar.bz2
+gcc_GET := wget http://ftp.gnu.org/gnu/gcc/$(gcc)/$(gcc_PKG) -O packages/$(gcc_PKG)
+gcc_CFG :=
+gcc-core_CFG := ../../source/$(gcc)/configure\
 	--target=$(target) --disable-multilib\
 	--with-sysroot=$(target_dir) --prefix=$(target_dir)\
 	--with-gmp=$(stage_dir) --with-mpfr=$(stage_dir) --with-mpc=$(stage_dir)
 
 gmp := gmp-5.0.5
-pkg_gmp := $(gmp).tar.bz2
-cfg_gmp := ../../source/$(gmp)/configure\
+gmp_PKG := $(gmp).tar.bz2
+gmp_GET := wget http://ftp.gnu.org/gnu/gmp/$(gmp_PKG) -O packages/$(gmp_PKG)
+gmp_CFG := ../../source/$(gmp)/configure\
 	--build=$(host) --prefix=$(stage_dir)\
-	--disable-shared --enable-static --enable-cxx
+	--disable-static --enable-shared --enable-cxx
 
 mpfr := mpfr-3.1.1
-pkg_mpfr := $(mpfr).tar.bz2
-cfg_mpfr := ../../source/$(mpfr)/configure\
+mpfr_PKG := $(mpfr).tar.bz2
+mpfr_GET := wget http://www.mpfr.org/mpfr-current/$(mpfr_PKG) -O packages/$(mpfr_PKG)
+mpfr_CFG := ../../source/$(mpfr)/configure\
 	--build=$(host) --prefix=$(stage_dir)\
-	--disable-shared --enable-static --with-gmp=$(stage_dir)
+	--disable-static --enable-shared --with-gmp=$(stage_dir)
 
 mpc := mpc-0.9
-pkg_mpc := $(mpc).tar.gz
-cfg_mpc := ../../source/$(mpc)/configure\
+mpc_PKG := $(mpc).tar.gz
+mpc_GET := wget http://www.multiprecision.org/mpc/download/$(mpc_PKG) -O packages/$(mpc_PKG)
+mpc_CFG := ../../source/$(mpc)/configure\
 	--build=$(host) --prefix=$(stage_dir)\
-	--disable-shared --enable-static\
-	--with-gmp=$(stage_dir) --with-mpfr=$(stage_dir) 
+	--disable-static --enable-shared\
+	--with-gmp=$(stage_dir) --with-mpfr=$(stage_dir)
+
+isl := isl-0.10
+isl_PKG := $(isl).tar.bz2
+isl_GET := wget ftp://gcc.gnu.org/pub/gcc/infrastructure/$(isl_PKG) -O packages/$(isl_PKG)
+isl_CFG := ../../source/$(isl)/configure\
+	--build=$(host) --prefix=$(stage_dir)\
+	--disable-static --enable-shared\
+	--with-gmp=system --with-gmp-prefix=$(stage_dir)
+
+cloog := cloog-0.17.0
+cloog_PKG := $(cloog).tar.gz
+cloog_GET := wget ftp://gcc.gnu.org/pub/gcc/infrastructure/$(cloog_PKG) -O packages/$(cloog_PKG)
+cloog_CFG := ../../source/$(cloog)/configure\
+	--build=$(host) --prefix=$(stage_dir)\
+	--disable-static --enable-shared\
+	--with-isl=system --with-isl-prefix=$(stage_dir)
 
 ppl := ppl-1.0
-pkg_ppl := $(ppl).tar.bz2
-get_ppl := wget http://bugseng.com/products/ppl/download/ftp/releases/1.0/$(pkg_ppl) -O packages/$(pkg_ppl)
-cfg_ppl := ../../source/$(ppl)/configure\
+ppl_PKG := $(ppl).tar.bz2
+ppl_GET := wget http://bugseng.com/products/ppl/download/ftp/releases/1.0/$(ppl_PKG) -O packages/$(ppl_PKG)
+ppl_CFG := ../../source/$(ppl)/configure\
 	--build=$(host) --prefix=$(stage_dir)\
-	--disable-shared --enable-static\
+	--disable-static --enable-shared\
 	--with-gmp=$(stage_dir) 
 
 cloog-ppl := cloog-ppl-0.15.11
-pkg_cloog-ppl := $(cloog-ppl).tar.gz
-cfg_cloog-ppl := ../../source/$(cloog-ppl)/configure\
+cloog-ppl_PKG := $(cloog-ppl).tar.gz
+cloog-ppl_GET := wget ftp://gcc.gnu.org/pub/gcc/infrastructure/$(cloog-ppl_PKG) -O packages/$(cloog-ppl_PKG)
+cloog-ppl_CFG := ../../source/$(cloog-ppl)/configure\
 	--build=$(host) --prefix=$(stage_dir)\
-	--disable-shared --enable-static\
+	--disable-static --enable-shared\
 	--with-gmp=$(stage_dir) --with-ppl=$(stage_dir)\
 	--with-host-libstdcxx="-lstdc++"
 
 polylib := polylib-5.22.5
-pkg_polylib := $(polylib).tar.gz
-uri_polylib := http://icps.u-strasbg.fr/polylib/polylib_src/$(pkg_polylib)
-cfg_polylib := ../../source/$(polylib)/configure\
+polylib_PKG := $(polylib).tar.gz
+polylib_GET := wget http://icps.u-strasbg.fr/polylib/polylib_src/$(polylib_PKG) -O packages/$(polylib_PKG)
+polylib_CFG := ../../source/$(polylib)/configure\
 	--build=$(host) --prefix=$(stage_dir)\
-	--disable-shared --enable-static\
+	--disable-static --enable-shared\
 	--enable-int-lib --enable-longint-lib --enable-longlongint-lib
 
-mingw-w64 := mingw-w64
-pkg_mingw-w64 := mingw-w64-latest.tar.gz
-uri_mingw-w64 := http://mingw-w64.svn.sourceforge.net/viewvc/mingw-w64/trunk/?view=tar
-cfg_mingw-w64 := ../../source/$(mingw-w64)/configure\
+mingw-w64 := mingw-w64-latest
+mingw-w64_PKG := $(mingw-w64).tar.gz
+mingw-w64_GET := wget http://mingw-w64.svn.sourceforge.net/viewvc/mingw-w64/trunk/?view=tar -O packages/$(mingw-w64_PKG)
+mingw-w64_CFG := ../../source/$(mingw-w64)/configure\
 	--build=i$(host) --host=$(target)\
 	--prefix=$(target_dir)
-cfg_mingw-w64-headers := ../../source/$(mingw-w64)/configure\
+mingw-w64-headers_CFG := ../../source/$(mingw-w64)/configure\
 	--build=$(host) --host=$(target) --prefix=$(target_dir)
 
+###############################################################################
+### rules
+###############################################################################
 all:
 
+###############################################################################
+### prepare rules
+###############################################################################
 bootstrap:
 	@mkdir -p build build/stage packages source $(target)
 
 configure: binutils_cfg gcc-core_cfg gmp_cfg mpfr_cfg mpc_cfg ppl_cfg cloog-ppl_cfg mingw-w64-headers_cfg
 
-
 fetch:
-	[ -f "packages/$(pkg_binutils)" ] || wget http://ftp.gnu.org/gnu/binutils/$(pkg_binutils) -O packages/$(pkg_binutils)
-	[ -f "packages/$(pkg_gcc)" ] || wget http://ftp.gnu.org/gnu/gcc/$(gcc)/$(pkg_gcc) -O packages/$(pkg_gcc)
-	[ -f "packages/$(pkg_gmp)" ] || wget http://ftp.gnu.org/gnu/gmp/$(pkg_gmp) -O packages/$(pkg_gmp)
-	[ -f "packages/$(pkg_mpfr)" ] || wget http://www.mpfr.org/mpfr-current/$(pkg_mpfr) -O packages/$(pkg_mpfr)
-	[ -f "packages/$(pkg_mpc)" ] || wget http://www.multiprecision.org/mpc/download/$(pkg_mpc) -O packages/$(pkg_mpc)
-#	[ -f "packages/$(pkg_ppl)" ] || wget ftp://ftp.cs.unipr.it/pub/ppl/releases/0.12.1/$(pkg_ppl) -O packages/$(pkg_ppl)
-	@[ -f "packages/$(pkg_ppl)" ] || $(get_ppl)
-	[ -f "packages/$(pkg_cloog-ppl)" ] || wget ftp://gcc.gnu.org/pub/gcc/infrastructure/$(pkg_cloog-ppl) -O packages/$(pkg_cloog-ppl)
-	[ -f "packages/$(pkg_polylib)" ] || wget $(uri_polylib) -O packages/$(pkg_polylib)
-	[ -f "packages/$(pkg_mingw-w64)" ] || wget $(uri_mingw-w64) -O packages/$(pkg_mingw-w64)
+	@[ -f "packages/$(binutils_PKG)" ] || $(binutils_GET)
+	@[ -f "packages/$(gcc_PKG)" ] || $(gcc_GET)
+	@[ -f "packages/$(gmp_PKG)" ] || $(gmp_GET)
+	@[ -f "packages/$(mpfr_PKG)" ] || $(mpfr_GET)
+	@[ -f "packages/$(mpc_PKG)" ] || $(mpc_GET)
+	@[ -f "packages/$(isl_PKG)" ] || $(isl_GET)
+	@[ -f "packages/$(cloog_PKG)" ] || $(cloog_GET)
+	@[ -f "packages/$(ppl_PKG)" ] || $(ppl_GET)
+	@[ -f "packages/$(cloog-ppl_PKG)" ] || $(cloog-ppl_GET)
+	@[ -f "packages/$(polylib_PKG)" ] || $(polylib_GET)
+	@[ -f "packages/$(mingw-w64_PKG)" ] || $(mingw-w64_GET)
 
+
+###############################################################################
+### binutils build rules
+###############################################################################
 binutils:
-	cd build/$(binutils);\
-	make && make install;
+	@cd build/$(binutils) || exit 1;\
+	make && make install-strip;
 
 binutils_cfg:
-	[ -d build/$(binutils) ] || mkdir -p build/$(binutils)
-	[ -d source/$(binutils) ] || tar jxvf packages/$(pkg_binutils) -Csource
-	cd build/$(binutils);\
-	$(cfg_binutils);\
+	@[ -d build/$(binutils) ] || mkdir -p build/$(binutils)
+	@[ -d source/$(binutils) ] || tar jxvf packages/$(binutils_PKG) -Csource
+	cd build/$(binutils) || exit 1;\
+	$(binutils_CFG);\
 
+
+###############################################################################
+### gcc build rules
+###############################################################################
 gcc:
+	cd build/$(gcc) || exit 1;\
+	make && make install-strip;
 
-mingw-w64: gcc-core
+gcc_cfg:
+	@[ -d "build/$(gcc)" ] || mkdir -p build/$(gcc)
+	@[ -d "source/$(gcc)" ] || tar jxvf packages/$(gcc_PKG) -Csource
+	cd build/$(gcc) || exit 1;\
+	$(gcc_CFG);
 
-mingw-w64-src:
-	[ -d "source/$(mingw-w64)" ] || (tar jxvf packages/$(pkg_mingw-w64) -Csource && [ -d "source/trunk" ] && mv source/trunk source/$(mingw-w64))
-	[ -d "source/$(mingw-w64)" ] || svn co http://mingw-w64.svn.sourceforge.net/svnroot/mingw-w64/trunk source/mingw-w64
-	[ -d "source/$(mingw-w64)/.svn" ] && (cd source/$(mingw-w64); svn up)
-	[ -d "build/$(mingw-w64)" ] || mkdir -p build/$(mingw-w64)
-	cd build/$(mingw-w64);\
-#	$(cfg_mingw-w64);\
-	make;
-
-mingw-w64-headers: mingw-w64-src binutils
-	cd build$(mingw-w64)/mingw-w64-headers;\
-	make && make install;
-
-mingw-w64-headers_cfg:
-	[ -d "build/$(mingw-w64)/mingw-w64-headers" ] || mkdir -p build/$(mingw-w64)/mingw-w64-headers
-	cd build$(mingw-w64)/mingw-w64-headers;\
-	$(cfg_mingw-w64-headers);
-
-
-gcc-core: mpc cloog-ppl mingw-w64-headers
-	cd build/$(gcc);\
+gcc-core:
+	cd build/$(gcc) || exit 1;\
 	make all-gcc && make install-gcc;
 
 gcc-core_cfg:
-	[ -d "build/$(gcc)" ] || mkdir -p build/$(gcc)
-	[ -d "source/$(gcc)" ] || tar jxvf packages/$(pkg_gcc) -Csource
-	cd build/$(gcc);\
-	$(cfg_gcc-core);
+	@[ -d "build/$(gcc)" ] || mkdir -p build/$(gcc)
+	@[ -d "source/$(gcc)" ] || tar jxvf packages/$(gcc_PKG) -Csource
+	cd build/$(gcc) || exit 1;\
+	$(gcc-core_CFG);
 
+###############################################################################
+### mingw-w64 build rules
+###############################################################################
+mingw-w64:
+	cd build/$(mingw-w64) || exit 1;\
+	make && make install-strip;
+
+mingw-w64_CFG:
+	@[ -d "source/$(mingw-w64)" ] || (tar jxvf packages/$(mingw-w64_PKG) -Csource && [ -d "source/trunk" ] && mv source/trunk source/$(mingw-w64))
+	@[ -d "source/$(mingw-w64)" ] || svn co http://mingw-w64.svn.sourceforge.net/svnroot/mingw-w64/trunk source/mingw-w64
+	@[ ! -d "source/$(mingw-w64)/.svn" ] || (cd source/$(mingw-w64); svn up)
+	@[ -d "build/$(mingw-w64)" ] || mkdir -p build/$(mingw-w64)
+	cd build/$(mingw-w64) || exit 1;\
+	$(mingw-w64_CFG);
+
+mingw-w64-headers:
+	cd build$(mingw-w64)/mingw-w64-headers;\
+	make && make install-strip;
+
+mingw-w64-headers_cfg:
+	@[ -d "build/$(mingw-w64)/mingw-w64-headers" ] || mkdir -p build/$(mingw-w64)/mingw-w64-headers
+	cd build/$(mingw-w64)/mingw-w64-headers || exit 1;\
+	$(mingw-w64-headers_CFG);
+
+###############################################################################
+### gmp build rules
+###############################################################################
 gmp:
-	cd build/$(gmp);\
-	make && make install;
+	cd build/$(gmp) || exit 1;\
+	make && make install-strip;
 
 gmp_cfg:
-	[ -d "build/$(gmp)" ] || mkdir -p build/$(gmp)
-	[ -d "source/$(gmp)" ] || tar jxvf packages/$(pkg_gmp) -Csource
-	cd build/$(gmp);\
-	$(cfg_gmp);
+	@[ -d "build/$(gmp)" ] || mkdir -p build/$(gmp)
+	@[ -d "source/$(gmp)" ] || tar jxvf packages/$(gmp_PKG) -Csource
+	cd build/$(gmp) || exit 1;\
+	$(gmp_CFG);
 
-mpfr: gmp
-	cd build/$(mpfr);\
-	make && make install;
+###############################################################################
+### mpfr build rules
+###############################################################################
+mpfr:
+	cd build/$(mpfr) || exit 1;\
+	make && make install-strip;
 
 mpfr_cfg:
-	[ -d "build/$(mpfr)" ] || mkdir -p build/$(mpfr)
-	[ -d "source/$(mpfr)" ] || tar xvf packages/$(pkg_mpfr) -Csource
-	cd build/$(mpfr);\
-	$(cfg_mpfr);
+	@[ -d "build/$(mpfr)" ] || mkdir -p build/$(mpfr)
+	@[ -d "source/$(mpfr)" ] || tar xvf packages/$(mpfr_PKG) -Csource
+	cd build/$(mpfr) || exit 1;\
+	$(mpfr_CFG);
 
-mpc: mpfr
-	cd build/$(mpc);\
-	make && make install;
+###############################################################################
+### mpc build rules
+###############################################################################
+mpc:
+	cd build/$(mpc) || exit 1;\
+	make && make install-strip;
 
 mpc_cfg:
-	[ -d "build/$(mpc)" ] || mkdir -p build/$(mpc)
-	[ -d "source/$(mpc)" ] || tar xvf packages/$(pkg_mpc) -Csource
-	cd build/$(mpc);\
-	$(cfg_mpc);
+	@[ -d "build/$(mpc)" ] || mkdir -p build/$(mpc)
+	@[ -d "source/$(mpc)" ] || tar xvf packages/$(mpc_PKG) -Csource
+	cd build/$(mpc) || exit 1;\
+	$(mpc_CFG);
 
-ppl: gmp
-	cd build/$(ppl);\
-	make && make install;
+###############################################################################
+### isl build rules
+###############################################################################
+isl:
+	cd build/$(isl) || exit 1;\
+	make && make install-strip;
+
+isl_cfg: 
+	@[ -d "build/$(isl)" ] || mkdir -p build/$(isl)
+	@[ -d "source/$(isl)" ] || tar xvf packages/$(isl_PKG) -Csource
+	cd build/$(isl) || exit 1;\
+	$(isl_CFG);
+
+###############################################################################
+### cloog build rules
+###############################################################################
+cloog:
+	cd build/$(cloog) || exit 1;\
+	make && make install-strip;
+
+cloog_cfg:
+	@[ -d "build/$(cloog)" ] || mkdir -p build/$(cloog)
+	@[ -d "source/$(cloog)" ] || tar xvf packages/$(cloog_PKG) -Csource
+	cd build/$(cloog) || exit 1;\
+	$(cloog_CFG);
+
+###############################################################################
+### ppl build rules
+###############################################################################
+ppl:
+	cd build/$(ppl) || exit 1;\
+	make && make install-strip;
 
 ppl_cfg: 
-	[ -d "build/$(ppl)" ] || mkdir -p build/$(ppl)
-	[ -d "source/$(ppl)" ] || tar xvf packages/$(pkg_ppl) -Csource
-	cd build/$(ppl);\
-	$(cfg_ppl);
+	@[ -d "build/$(ppl)" ] || mkdir -p build/$(ppl)
+	@[ -d "source/$(ppl)" ] || tar xvf packages/$(ppl_PKG) -Csource
+	cd build/$(ppl) || exit 1;\
+	$(ppl_CFG);
 
-cloog-ppl: ppl
-	cd build/$(cloog-ppl);\
-	make && make install;
+###############################################################################
+### cloog-ppl build rules
+###############################################################################
+cloog-ppl:
+	cd build/$(cloog-ppl) || exit 1;\
+	make && make install-strip;
 
 cloog-ppl_cfg:
-	[ -d "build/$(cloog-ppl)" ] || mkdir -p build/$(cloog-ppl)
-	[ -d "source/$(cloog-ppl)" ] || tar xvf packages/$(pkg_cloog-ppl) -Csource
-	cd build/$(cloog-ppl);\
-	$(cfg_cloog-ppl);
+	@[ -d "build/$(cloog-ppl)" ] || mkdir -p build/$(cloog-ppl)
+	@[ -d "source/$(cloog-ppl)" ] || tar xvf packages/$(cloog-ppl_PKG) -Csource
+	cd build/$(cloog-ppl) || exit 1;\
+	$(cloog-ppl_CFG);
 
+###############################################################################
+### polylib build rules
+###############################################################################
 polylib:
-	cd build/$(polylib);\
-	make && make install;
+	cd build/$(polylib) || exit 1;\
+	make && make install-strip;
 
 polylib_cfg:
 	[ -d "build/$(polylib)" ] || mkdir -p build/$(polylib)
-	[ -d "source/$(polylib)" ] || tar xvf packages/$(pkg_polylib) -Csource
-	cd build/$(polylib);\
-	$(cfg_polylib);
+	[ -d "source/$(polylib)" ] || tar xvf packages/$(polylib_PKG) -Csource
+	cd build/$(polylib) || exit 1;\
+	$(polylib_CFG);
 
+###############################################################################
+### install all builted files
+###############################################################################
 install:
 	$(MAKE) -C build/$(binutils) $@
 	$(MAKE) -C build/$(mingw-w64) $@
