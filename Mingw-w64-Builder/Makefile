@@ -24,16 +24,16 @@ binutils_CFG := ../../source/$(binutils)/configure\
 	--disable-ppl-version-check --disable-cloog-version-check\
 	--with-sysroot=$(target_dir) --prefix=$(target_dir)\
 	--with-gmp=$(stage_dir) --with-mpfr=$(stage_dir) --with-mpc=$(stage_dir)\
-	--with-ppl=$(stage_dir) --with-cloog=$(stage_dir)
+	--with-ppl=$(stage_dir) --with-cloog=$(stage_dir) LDFLAGS="-Wl,-rpath,\\\$$\\\$$ORIGIN:\\\$$\\\$$ORIGIN/../lib"
 
 gcc := gcc-4.7.1
 gcc_PKG := $(gcc).tar.bz2
 gcc_GET := wget http://ftp.gnu.org/gnu/gcc/$(gcc)/$(gcc_PKG) -O packages/$(gcc_PKG)
-gcc_CFG := LDFLAGS="-Wl,-rpath,\$$ORIGIN:\$$ORIGIN/..lib" ../../source/$(gcc)/configure\
+gcc_CFG := LDFLAGS="-Wl,-rpath,\\$$ORIGIN:\\$$ORIGIN/..lib" ../../source/$(gcc)/configure\
 	--target=$(target) --disable-multilib --enable-languages=c,c++\
 	--with-sysroot=$(target_dir) --prefix=$(target_dir)\
 	--with-gmp=$(stage_dir) --with-mpfr=$(stage_dir) --with-mpc=$(stage_dir)
-gcc-core_CFG := LDFLAGS="-Wl,-rpath,\$$ORIGIN:\$$ORIGIN/..lib" ../../source/$(gcc)/configure\
+gcc-core_CFG := LDFLAGS="'-Wl,-rpath,\$$\$$ORIGIN:\$$\$$ORIGIN/../lib'" ../../source/$(gcc)/configure\
 	--target=$(target) --disable-multilib --enable-languages=c,c++\
 	--disable-ppl-version-check --disable-cloog-version-check\
 	--enable-lto --enable-cloog-backend=isl\
@@ -189,6 +189,11 @@ gcc-core_cfg:
 mingw-w64:
 	cd build/$(mingw-w64) || exit 1;\
 	make && make install;
+
+mingw-w64_src:
+	@[ -d "source/$(mingw-w64)" ] || (tar xvf packages/$(mingw-w64_PKG) -Csource && [ -d "source/trunk" ] && mv source/trunk source/$(mingw-w64))
+	@[ -d "source/$(mingw-w64)" ] || svn co http://mingw-w64.svn.sourceforge.net/svnroot/mingw-w64/trunk source/mingw-w64
+	@[ ! -d "source/$(mingw-w64)/.svn" ] || (cd source/$(mingw-w64); svn up)
 
 mingw-w64_cfg:
 	@[ -d "source/$(mingw-w64)" ] || (tar xvf packages/$(mingw-w64_PKG) -Csource && [ -d "source/trunk" ] && mv source/trunk source/$(mingw-w64))
