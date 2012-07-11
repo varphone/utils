@@ -12,34 +12,37 @@ top_dir := $(shell pwd)
 stage_dir := $(top_dir)/build/stage
 target_dir := $(top_dir)/$(target)
 
+extra_LDFLAGS := '-Wl,-rpath,[[PLACEHOLDER:PLACEHOLDER:PLACEHOLDER:PLACEHOLDER:PLACEHOLDER:PLACEHOLDER:PLACEHOLDER]]'
+
 ###############################################################################
 ### compoments defines
 ###############################################################################
 binutils := binutils-2.22
 binutils_PKG := $(binutils).tar.bz2
 binutils_GET := wget http://ftp.gnu.org/gnu/binutils/$(binutils_PKG) -O packages/$(binutils_PKG)
-binutils_CFG := ../../source/$(binutils)/configure\
+binutils_CFG := LDFLAGS=$(extra_LDFLAGS) ../../source/$(binutils)/configure\
 	--target=$(target) --disable-multilib\
 	--disable-static --enable-shared --enable-lto --enable-cloog-backend=isl\
 	--disable-ppl-version-check --disable-cloog-version-check\
 	--with-sysroot=$(target_dir) --prefix=$(target_dir)\
 	--with-gmp=$(stage_dir) --with-mpfr=$(stage_dir) --with-mpc=$(stage_dir)\
-	--with-ppl=$(stage_dir) --with-cloog=$(stage_dir) LDFLAGS="-Wl,-rpath,\\\$$\\\$$ORIGIN:\\\$$\\\$$ORIGIN/../lib"
+	--with-ppl=$(stage_dir) --with-cloog=$(stage_dir) 
 
 gcc := gcc-4.7.1
 gcc_PKG := $(gcc).tar.bz2
 gcc_GET := wget http://ftp.gnu.org/gnu/gcc/$(gcc)/$(gcc_PKG) -O packages/$(gcc_PKG)
-gcc_CFG := LDFLAGS="-Wl,-rpath,\\$$ORIGIN:\\$$ORIGIN/..lib" ../../source/$(gcc)/configure\
+#gcc_CFG := LDFLAGS= $(extra_LDFLAGS) ../../source/$(gcc)/configure\
 	--target=$(target) --disable-multilib --enable-languages=c,c++\
 	--with-sysroot=$(target_dir) --prefix=$(target_dir)\
 	--with-gmp=$(stage_dir) --with-mpfr=$(stage_dir) --with-mpc=$(stage_dir)
-gcc-core_CFG := LDFLAGS="'-Wl,-rpath,\$$\$$ORIGIN:\$$\$$ORIGIN/../lib'" ../../source/$(gcc)/configure\
+gcc_CFG := LDFLAGS=$(extra_LDFLAGS) ../../source/$(gcc)/configure\
 	--target=$(target) --disable-multilib --enable-languages=c,c++\
 	--disable-ppl-version-check --disable-cloog-version-check\
 	--enable-lto --enable-cloog-backend=isl\
 	--with-sysroot=$(target_dir) --prefix=$(target_dir)\
 	--with-gmp=$(stage_dir) --with-mpfr=$(stage_dir) --with-mpc=$(stage_dir)\
 	--with-ppl=$(stage_dir) --with-cloog=$(stage_dir)
+gcc-core_CFG := $(gcc_CFG)
 
 gmp := gmp-5.0.5
 gmp_PKG := $(gmp).tar.bz2
@@ -119,6 +122,9 @@ mingw-w64-headers_CFG := ../../../source/$(mingw-w64)/mingw-w64-headers/configur
 	--build=$(build) --host=$(target)\
 	--prefix=$(target_dir)/$(target)
 
+export PATH := $(top_dir)/$(target)/bin:$(PATH)
+export LD_LIBRARY_PATH := $(top_dir)/build/stage/lib
+
 ###############################################################################
 ### rules
 ###############################################################################
@@ -131,6 +137,7 @@ bootstrap:
 	@mkdir -p build build/stage packages source $(target)
 
 configure: binutils_cfg gcc-core_cfg gmp_cfg mpfr_cfg mpc_cfg ppl_cfg cloog-ppl_cfg mingw-w64-headers_cfg
+
 
 fetch:
 	@[ -f "packages/$(binutils_PKG)" ] || $(binutils_GET)
@@ -186,7 +193,7 @@ gcc-core_cfg:
 ###############################################################################
 ### mingw-w64 build rules
 ###############################################################################
-mingw-w64:
+mingw-w64: 
 	cd build/$(mingw-w64) || exit 1;\
 	make && make install;
 
@@ -331,20 +338,19 @@ polylib_cfg:
 ###############################################################################
 ### install all builted files
 ###############################################################################
+
+.PHONY: clean distclean fixrpath install package
+
 install:
 	$(MAKE) -C build/$(binutils) $@
 	$(MAKE) -C build/$(mingw-w64) $@
 
-patch-rpath:
-	@for f in $(target)/bin/*; do \
-		[ -n "$$(chrpath $${f} 2> /dev/null | grep "$(top_dir)")" ] && (chrpath -r \$$ORIGIN:\$$ORIGIN/../lib $${f} > /dev/null && echo patch $${f}) || echo skip $${f}; \
-	done
+fixrpath:
+	@echo "Fixing RPATH on executable file(s) in $(target)"
+	@./fixrpath $(target)
 
-package: patch-rpath
+package: fixrpath
 	[ ! -d "$(target)/$(build)/$(target)" ] || (mv -aP $(target)/$(build)/$(target)/* $(target)/; rm -rf $(target)/$(build))
 	[ ! -d "build/stage/lib" ] || cp -aP build/stage/lib/lib* $(target)/libexec/gcc/$(target)/*/
 	tar jcvf $(target)-$$(uname)-$$(date +%Y%m%d).tar.bz2 $(target)
-
-
-
 

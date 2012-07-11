@@ -1,0 +1,16 @@
+#!/bin/bash
+
+for f in $(find $1 -executable -type f)
+do
+	elf=$(file $f|grep "ELF\s*.*executable")
+	[ -n "$elf" ] && {
+		rpath=$(chrpath -l $f|grep "[[PLACEHOLDER]]")
+		[ -n "$rpath" ]	&& {
+			echo "Fixing RPATH of \"$f\""
+			chrpath -r \$ORIGIN:\$ORIGIN/..lib:\$ORIGIN/../../lib $f > /dev/null
+		}
+	}
+done
+
+exit 0
+
