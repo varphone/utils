@@ -239,11 +239,11 @@ endif
 #
 # Common helpers
 #
-HOSTCONF := --prefix="$(PREFIX)"
-HOSTCONF += --build="$(BUILD)" --host="$(HOST)" --target="$(HOST)"
+HOSTCONF := --prefix=$(PREFIX)
+HOSTCONF += --build=$(BUILD) --host=$(HOST) --target=$(HOST)
 HOSTCONF += --program-prefix=""
 # libtool stuff:
-HOSTCONF += --enable-static --disable-shared --disable-dependency-tracking
+HOSTCONF += --enable-static --enable-shared --disable-dependency-tracking
 ifdef HAVE_WIN32
 HOSTCONF += --without-pic
 PIC :=
@@ -252,10 +252,11 @@ HOSTCONF += --with-pic
 PIC := -fPIC
 endif
 
+BUILDVARS := \
+	PATH=$(PREFIX)/bin:$(PATH)
 HOSTTOOLS := \
 	CC="$(CC)" CXX="$(CXX)" LD="$(LD)" \
-	AR="$(AR)" RANLIB="$(RANLIB)" STRIP="$(STRIP)" \
-	PATH="$(PREFIX)/bin:$(PATH)"
+	AR="$(AR)" RANLIB="$(RANLIB)" STRIP="$(STRIP)"
 HOSTVARS := \
 	CPPFLAGS="$(CPPFLAGS)" \
 	CFLAGS="$(CFLAGS)" \
