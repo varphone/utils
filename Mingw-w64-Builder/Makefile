@@ -28,9 +28,10 @@ binutils_CFG := LDFLAGS=$(extra_LDFLAGS) ../../source/$(binutils)/configure\
 	--with-gmp=$(stage_dir) --with-mpfr=$(stage_dir) --with-mpc=$(stage_dir)\
 	--with-ppl=$(stage_dir) --with-cloog=$(stage_dir) 
 
-gcc := gcc-4.7.1
+gcc := gcc-4.8-20120708
 gcc_PKG := $(gcc).tar.bz2
-gcc_GET := wget http://ftp.gnu.org/gnu/gcc/$(gcc)/$(gcc_PKG) -O packages/$(gcc_PKG)
+gcc_GET := wget ftp://gcc.gnu.org/pub/gcc/snapshots/4.8-20120708/gcc-4.8-20120708.tar.bz2
+#gcc_GET := wget http://ftp.gnu.org/gnu/gcc/$(gcc)/$(gcc_PKG) -O packages/$(gcc_PKG)
 #gcc_CFG := LDFLAGS= $(extra_LDFLAGS) ../../source/$(gcc)/configure\
 	--target=$(target) --disable-multilib --enable-languages=c,c++\
 	--with-sysroot=$(target_dir) --prefix=$(target_dir)\
@@ -41,7 +42,7 @@ gcc_CFG := LDFLAGS=$(extra_LDFLAGS) ../../source/$(gcc)/configure\
 	--enable-lto --enable-cloog-backend=isl\
 	--with-sysroot=$(target_dir) --prefix=$(target_dir)\
 	--with-gmp=$(stage_dir) --with-mpfr=$(stage_dir) --with-mpc=$(stage_dir)\
-	--with-ppl=$(stage_dir) --with-cloog=$(stage_dir)
+	--with-ppl=$(stage_dir) --with-isl=$(stage_dir) --with-cloog=$(stage_dir)
 gcc-core_CFG := $(gcc_CFG)
 
 gmp := gmp-5.0.5

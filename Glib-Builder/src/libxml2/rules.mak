@@ -11,6 +11,8 @@ ifeq ($(call need_pkg,"libxml-2.0"),)
 PKGS_FOUND += $(LIBXML2)
 endif
 
+DEPS_$(LIBXML2) :=
+
 $(TARBALLS)/$(LIBXML2_PKG):
 	$(call download,$(LIBXML2_URL))
 
@@ -22,6 +24,10 @@ $(LIBXML2): $(LIBXML2_PKG) .sum-$(LIBXML2)
 
 .$(LIBXML2): $(LIBXML2)
 	$(RECONF)
-	cd $< && $(HOSTVARS) ./configure $(HOSTCONF) CFLAGS="-DLIBXML_STATIC" $(LIBXML2_CFG)
+ifndef HAVE_CROSS_COMPILE
+	cd $< && $(BUILDVARS) $(HOSTTOOLS) $(HOSTVARS) ./configure $(HOSTCONF) $(LIBXML2_CFG)
+else
+	cd $< && $(HOSTTOOLS) $(HOSTVARS) ./configure $(HOSTCONF) $(LIBXML2_CFG)
+endif
 	cd $< && $(MAKE) install
 	touch $@

@@ -15,6 +15,8 @@ ifeq ($(call need_pkg,"dbus-1"),)
 PKGS_FOUND += $(DBUS)
 endif
 
+DEPS_$(DBUS) := libxml2 $(DEPS_libxml2)
+
 $(TARBALLS)/$(DBUS_PKG):
 	$(call download,$(DBUS_URL))
 

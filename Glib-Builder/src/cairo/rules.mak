@@ -7,7 +7,7 @@ CAIRO_URL := http://cairographics.org/releases/$(CAIRO_PKG)
 CAIRO_CFG := --enable-silent-rules --enable-gtk-doc-html=no \
 	--enable-xlib=no --enable-xlib-xrender=no --enable-xcb=no --enable-xlib-xcb=no \
 	--enable-xcb-shm=no --enable-skia=no --enable-os2=no --enable-drm=no \
-	--enable-gallium=no
+	--enable-gallium=no --enable-gobject=yes
 
 PKGS += $(CAIRO)
 ifeq ($(call need_pkg,"cairo"),)

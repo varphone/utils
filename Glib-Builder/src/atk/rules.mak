@@ -11,7 +11,7 @@ ifeq ($(call need_pkg,"atk"),)
 PKGS_FOUND += $(ATK)
 endif
 
-DEPS_$(ATK) :=
+DEPS_$(ATK) := glib $(DEPS_glib)
 
 $(TARBALLS)/$(ATK_PKG):
 	$(call download,$(ATK_URL))
