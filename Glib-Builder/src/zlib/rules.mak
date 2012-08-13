@@ -22,6 +22,6 @@ $(ZLIB): $(ZLIB_PKG) .sum-$(ZLIB)
 
 .$(ZLIB): $(ZLIB)
 #	$(RECONF)
-	cd $< && $(HOSTVARS) ./configure $(ZLIB_CFG)
+	cd $< && $(HOSTTOOLS) $(HOSTVARS) ./configure $(ZLIB_CFG)
 	cd $< && $(MAKE) install
 	touch $@

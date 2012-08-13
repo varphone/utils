@@ -4,9 +4,7 @@ GLIB := glib
 GLIB_VERSION := 2.33.8
 GLIB_PKG := glib-$(GLIB_VERSION).tar.xz
 GLIB_URL := http://ftp.gnome.org/pub/gnome/sources/glib/2.33/$(GLIB_PKG)
-GLIB_CFG := --build=$(BUILD) --host=$(HOST) --prefix=$(PREFIX) \
-	--enable-debug=no --enable-static=yes \
-	--disable-selinux --disable-fam --disable-libelf --disable-xattr --disable-man
+GLIB_CFG := --enable-debug=no --disable-selinux --disable-fam --disable-libelf --disable-xattr --disable-man
 ifdef HAVE_CROSS_COMPILE
 GLIB_CFG +=	glib_cv_stack_grows=no glib_cv_uscore=no ac_cv_func_posix_getpwuid_r=yes \
 	ac_cv_func_posix_getgrgid_r=yes ac_cv_lib_rt_clock_gettime=no glib_cv_monotonic_clock=yes
@@ -32,9 +30,9 @@ $(GLIB): $(GLIB_PKG) .sum-$(GLIB)
 .$(GLIB): $(GLIB)
 	cd $< NOCONFIGURE=1 ./autogen.sh
 ifndef HAVE_CROSS_COMPILE
-	cd $< && $(HOSTVARS) ./configure $(HOSTCONF) $(GLIB_CFG)
+	cd $< && $(BUILDVARS) $(HOSTTOOLS) $(HOSTVARS) ./configure $(HOSTCONF) $(GLIB_CFG)
 else
-	cd $< && ./configure $(HOSTCONF) $(GLIB_CFG)
+	cd $< && $(HOSTTOOLS) $(HOSTVARS) ./configure $(HOSTCONF) $(GLIB_CFG)
 endif
 	cd $< && $(MAKE) install
 	touch $@

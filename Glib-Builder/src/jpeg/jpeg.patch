@@ -1,0 +1,32 @@
+--- jpeg/makefile.cfg-orig	2012-08-13 16:54:06.725821437 +0800
++++ jpeg/makefile.cfg	2012-08-13 16:51:18.920989587 +0800
+@@ -17,7 +17,7 @@
+ binprefix =
+ manprefix =
+ manext = 1
+-mandir = $(prefix)/man/man$(manext)
++mandir = $(prefix)/share/man/man$(manext)
+ 
+ # The name of your C compiler:
+ CC= @CC@
+--- jpeg/configure-orig	2012-08-13 17:25:28.459152514 +0800
++++ jpeg/configure	2012-08-13 17:26:04.915333289 +0800
+@@ -1559,6 +1559,7 @@
+   if test "x$LTSTATIC" = xno; then
+     disable_static="--disable-static"
+   fi
++  export host=$host
+   $srcdir/ltconfig $disable_shared $disable_static $srcdir/ltmain.sh
+ fi
+ 
+--- jpeg/ltconfig-orig	1998-03-25 23:25:39.000000000 +0800
++++ jpeg/ltconfig	2012-08-13 18:08:42.876017511 +0800
+@@ -83,7 +83,7 @@
+ srcdir=
+ ac_config_guess=
+ ac_config_sub=
+-host=
++host=$host
+ nonopt=
+ verify_host=yes
+ with_gcc=no

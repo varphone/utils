@@ -11,11 +11,10 @@ ifeq ($(call need_pkg,"libpng"),)
 PKGS_FOUND += $(LIBPNG)
 endif
 
-DEPS_libpng = zlib $(DEPS_zlib)
+DEPS_$(LIBPNG) = zlib $(DEPS_zlib)
 
 $(TARBALLS)/$(LIBPNG_PKG):
 	$(call download,$(LIBPNG_URL))
-	[ -f $(SRC)/$(LIBPNG)/SHA512SUMS ] || (cd $(TARBALLS); sha512sum $(LIBPNG_PKG) > $(SRC)/$(LIBPNG)/SHA512SUMS)
 
 .sum-$(LIBPNG): $(LIBPNG_PKG)
 

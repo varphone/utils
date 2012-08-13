@@ -14,7 +14,6 @@ endif
 
 $(TARBALLS)/$(FREETYPE_PKG):
 	$(call download,$(FREETYPE_URL))
-	[ -f $(SRC)/$(FREETYPE)/SHA512SUMS ] || cd $(TARBALLS) && sha512sum $(basename $@) > $(SRC)/$(FREETYPE)/SHA512SUMS
 
 .sum-$(FREETYPE): $(FREETYPE_PKG)
 
@@ -24,12 +23,12 @@ $(FREETYPE): $(FREETYPE_PKG) .sum-$(FREETYPE)
 
 .$(FREETYPE): $(FREETYPE)
 #	cd $< && $(RECONF)
-#	cd $< && NOCONFIGURE-1 ./autogen.sh
+#	cd $< && NOCONFIGURE=1 ./autogen.sh
 #	cd $< && ./autogen.sh --no-configure
 ifndef HAVE_CROSS_COMPILE
-	cd $< && $(HOSTVARS) ./configure $(FREETYPE_CFG)
+	cd $< && $(BUILDVARS) $(HOSTTOOLS) $(HOSTVARS) ./configure $(HOSTCONF) $(FREETYPE_CFG)
 else
-	cd $< && ./configure $(FREETYPE_CFG)
+	cd $< && $(HOSTTOOLS) $(HOSTVARS) ./configure $(HOSTCONF) $(FREETYPE_CFG)
 endif
 	cd $< && $(MAKE) install
 	touch $@

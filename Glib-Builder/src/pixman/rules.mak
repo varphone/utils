@@ -14,7 +14,6 @@ endif
 
 $(TARBALLS)/$(PIXMAN_PKG):
 	$(call download,$(PIXMAN_URL))
-	[ -f $(SRC)/$(PIXMAN)/SHA512SUMS ] || cd $(TARBALLS) && sha512sum $(basename $@) > $(SRC)/$(PIXMAN)/SHA512SUMS
 
 .sum-$(PIXMAN): $(PIXMAN_PKG)
 
@@ -24,7 +23,7 @@ $(PIXMAN): $(PIXMAN_PKG) .sum-$(PIXMAN)
 
 .$(PIXMAN): $(PIXMAN)
 #	cd $< && $(RECONF)
-#	cd $< && NOCONFIGURE-1 ./autogen.sh
+	cd $< && NOCONFIGURE=1 ./autogen.sh
 #	cd $< && ./autogen.sh --no-configure
 ifndef HAVE_CROSS_COMPILE
 	cd $< && $(HOSTVARS) ./configure $(PIXMAN_CFG)
