@@ -22,16 +22,17 @@ ${UNAME} := ${LNAME}
 ${UNAME}_VERSION :=
 ${UNAME}_PKG := \$(${UNAME})-\$(${UNAME}_VERSION)
 ${UNAME}_URL := \$(${UNAME}_PKG)
-${UNAME}_CFG := --build=\$(BUILD) --host=\$(HOST) --prefix=\$(PREFIX) \\
+${UNAME}_CFG := 
 
 PKGS += \$(${UNAME})
 ifeq (\$(call need_pkg,"${LNAME}"),)
 PKGS_FOUND += \$(${UNAME})
 endif
 
+DEPS_\$(${UNAME}) :=
+
 \$(TARBALLS)/\$(${UNAME}_PKG):
 	\$(call download,\$(${UNAME}_URL))
-	[ -f \$(SRC)/\$(${UNAME})/SHA512SUMS ] || (cd \$(TARBALLS) && sha512sum \$(basename \$@)) > \$(SRC)/\$(${UNAME})/SHA512SUMS
 
 .sum-\$(${UNAME}): \$(${UNAME}_PKG)
 
@@ -41,12 +42,12 @@ endif
 
 .\$(${UNAME}): \$(${UNAME})
 #	cd $< && \$(RECONF)
-#	cd $< && NOCONFIGURE-1 ./autogen.sh
+#	cd $< && NOCONFIGURE=1 ./autogen.sh
 #	cd $< && ./autogen.sh --no-configure
 ifndef HAVE_CROSS_COMPILE
-	cd \$< && \$(HOSTVARS) ./configure \$(${UNAME}_CFG)
+	cd \$< && \$(BUILDVARS) \$(HOSTOOLS) \$(HOSTVARS) ./configure \$(HOSTCONF) \$(${UNAME}_CFG)
 else
-	cd \$< && ./configure \$(${UNAME}_CFG)
+	cd \$< && \$(HOSTOOLS) \$(HOSTVARS) ./configure \$(HOSTCONF) \$(${UNAME}_CFG)
 endif
 	cd \$< && \$(MAKE) install
 	touch \$@
