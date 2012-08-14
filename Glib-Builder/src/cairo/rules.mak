@@ -14,7 +14,7 @@ ifeq ($(call need_pkg,"cairo"),)
 PKGS_FOUND += $(CAIRO)
 endif
 
-DEPS_$(CAIRO) = freetype $(DEPS_freetype) fontconfig $(DEPS_fontconfig) libpng $(DEPS_libpng) pixman $(DEPS_pixman)
+DEPS_$(CAIRO) = freetype fontconfig libpng libX11 pixman
 
 $(TARBALLS)/$(CAIRO_PKG):
 	$(call download,$(CAIRO_URL))
