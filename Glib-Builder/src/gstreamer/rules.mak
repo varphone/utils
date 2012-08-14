@@ -15,6 +15,8 @@ ifeq ($(call need_pkg,"gstreamer"),)
 PKGS_FOUND += $(GSTREAMER)
 endif
 
+DEPS_$(GSTREAMER) := glib
+
 $(TARBALLS)/$(GSTREAMER_PKG):
 	$(call download,$(GSTREAMER_URL))
 

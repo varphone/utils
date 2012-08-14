@@ -11,7 +11,7 @@ ifeq ($(call need_pkg,"libXau"),)
 PKGS_FOUND += $(LIBXAU)
 endif
 
-DEPS_$(LIBXAU) :=
+DEPS_$(LIBXAU) := xproto
 
 $(TARBALLS)/$(LIBXAU_PKG):
 	$(call download_git,$(LIBXAU_URL))

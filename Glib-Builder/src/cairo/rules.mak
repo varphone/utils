@@ -5,7 +5,7 @@ CAIRO_VERSION := 1.12.2
 CAIRO_PKG := $(CAIRO)-$(CAIRO_VERSION).tar.xz
 CAIRO_URL := http://cairographics.org/releases/$(CAIRO_PKG)
 CAIRO_CFG := --enable-silent-rules --enable-gtk-doc-html=no \
-	--enable-xlib=no --enable-xlib-xrender=no --enable-xcb=no --enable-xlib-xcb=no \
+	--enable-xlib=yes --enable-xlib-xrender=no --enable-xcb=yes --enable-xlib-xcb=yes \
 	--enable-xcb-shm=no --enable-skia=no --enable-os2=no --enable-drm=no \
 	--enable-gallium=no --enable-gobject=yes
 
@@ -14,7 +14,7 @@ ifeq ($(call need_pkg,"cairo"),)
 PKGS_FOUND += $(CAIRO)
 endif
 
-DEPS_$(CAIRO) = freetype fontconfig libpng libX11 pixman
+DEPS_$(CAIRO) = freetype fontconfig libpng libX11 libXrender pixman
 
 $(TARBALLS)/$(CAIRO_PKG):
 	$(call download,$(CAIRO_URL))

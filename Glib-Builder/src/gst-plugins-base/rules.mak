@@ -16,7 +16,7 @@ ifeq ($(call need_pkg,"gst-plugins-base"),)
 PKGS_FOUND += $(GST-PLUGINS-BASE)
 endif
 
-DEPS_$(GST-PLUGINS-BASE) := gstreamer $(DEPS_gstreamer) libogg $(DEPS_libogg) libvorbis $(DEPS_libvorbis)
+DEPS_$(GST-PLUGINS-BASE) := gstreamer libogg libvorbis
 
 $(TARBALLS)/$(GST-PLUGINS-BASE_PKG):
 	$(call download,$(GST-PLUGINS-BASE_URL))

@@ -15,8 +15,7 @@ ifeq ($(call need_pkg,"glib-2.0"),)
 PKGS_FOUND += $(GLIB)
 endif
 
-DEPS_$(GLIB) = zlib $(DEPS_zlib) dbus $(DEPS_dbus) libffi $(DEPS_libffi) \
-	libxml2 $(DEPS_libxml2)
+DEPS_$(GLIB) := zlib dbus libffi libxml2
 
 $(TARBALLS)/$(GLIB_PKG):
 	$(call download,$(GLIB_URL))

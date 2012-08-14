@@ -302,7 +302,7 @@ UPDATE_AUTOCONFIG = for dir in $(AUTOMAKE_DATA_DIRS); do \
 	done
 
 RECONF = mkdir -p -- $(PREFIX)/share/aclocal && \
-	cd $< && autoreconf -fiv $(ACLOCAL_AMFLAGS)
+		autoreconf -fiv $(ACLOCAL_AMFLAGS)
 CMAKE = cmake . -DCMAKE_TOOLCHAIN_FILE=$(abspath toolchain.cmake) \
 		-DCMAKE_INSTALL_PREFIX=$(PREFIX)
 
@@ -348,7 +348,7 @@ distclean: clean
 
 PREBUILT_URL=https://github.com/varphone/utils/prebuilt/$(PAK)-$(HOST)-latest.tar.bz2
 
-$(APP)-$(HOST)-latest.tar.bz2:
+$(PAK)-$(HOST)-latest.tar.bz2:
 	$(call download,$(PREBUILT_URL))
 
 prebuilt: $(PAK)-$(HOST)-latest.tar.bz2
