@@ -11,7 +11,7 @@ ifeq ($(call need_pkg,"fontconfig"),)
 PKGS_FOUND += $(FONTCONFIG)
 endif
 
-DEPS_$(FONTCONFIG) := libxml2 $(DEPS_libxml2)
+DEPS_$(FONTCONFIG) = libxml2 $(DEPS_libxml2)
 
 $(TARBALLS)/$(FONTCONFIG_PKG):
 	$(call download,$(FONTCONFIG_URL))

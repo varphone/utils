@@ -181,12 +181,15 @@ PKG_CONFIG ?= pkg-config
 ifdef HAVE_CROSS_COMPILE
 # This inhibits .pc file from within the cross-compilation toolchain sysroot.
 # Hopefully, nobody ever needs that.
-PKG_CONFIG_PATH := /usr/share/pkgconfig
-PKG_CONFIG_LIBDIR := /usr/$(HOST)/lib/pkgconfig
-export PKG_CONFIG_LIBDIR
+#PKG_CONFIG_PATH := /usr/share/pkgconfig
+#PKG_CONFIG_LIBDIR := /usr/$(HOST)/lib/pkgconfig
 endif
-PKG_CONFIG_PATH := $(PKG_CONFIG_PATH):$(PREFIX)/lib/pkgconfig
+LD_LIBRARY_PATH := $(PREFIX)/lib
+PKG_CONFIG_PATH := $(PREFIX)/lib/pkgconfig:/usr/share/pkgconfig
+PKG_CONFIG_LIBDIR := $(PREFIX)/lib/pkgconfig:/usr/$(HOST)/lib/pkgconfig
+export LD_LIBRARY_PATH
 export PKG_CONFIG_PATH
+export PKG_CONFIG_LIBDIR
 
 ifndef GIT
 ifeq ($(shell git --version >/dev/null 2>&1 || echo FAIL),)
@@ -401,7 +404,9 @@ endif
 	touch $@
 
 .sum-%:
-	$(error Download and check target not defined for $*)
+	$(warning Download and check target not defined for $*)
+	touch $@
+	sleep 3
 
 # Dummy dependency on found packages
 $(patsubst %,.dep-%,$(PKGS_FOUND)): .dep-%:

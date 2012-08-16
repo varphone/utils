@@ -11,7 +11,7 @@ ifeq ($(call need_pkg,"libxcb"),)
 PKGS_FOUND += $(LIBXCB)
 endif
 
-DEPS_$(LIBXCB) := xcb-proto
+DEPS_$(LIBXCB) := libXdmcp xcb-proto
 
 $(TARBALLS)/$(LIBXCB_PKG):
 	$(call download,$(LIBXCB_URL))

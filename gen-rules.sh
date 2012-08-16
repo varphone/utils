@@ -29,7 +29,7 @@ ifeq (\$(call need_pkg,"${LNAME}"),)
 PKGS_FOUND += \$(${UNAME})
 endif
 
-DEPS_\$(${UNAME}) :=
+DEPS_\$(${UNAME}) =
 
 \$(TARBALLS)/\$(${UNAME}_PKG):
 	\$(call download,\$(${UNAME}_URL))
@@ -45,9 +45,9 @@ DEPS_\$(${UNAME}) :=
 #	cd $< && NOCONFIGURE=1 ./autogen.sh
 #	cd $< && ./autogen.sh --no-configure
 ifndef HAVE_CROSS_COMPILE
-	cd \$< && \$(BUILDVARS) \$(HOSTOOLS) \$(HOSTVARS) ./configure \$(HOSTCONF) \$(${UNAME}_CFG)
+	cd \$< && \$(BUILDVARS) \$(HOSTTOOLS) \$(HOSTVARS) ./configure \$(HOSTCONF) \$(${UNAME}_CFG)
 else
-	cd \$< && \$(HOSTOOLS) \$(HOSTVARS) ./configure \$(HOSTCONF) \$(${UNAME}_CFG)
+	cd \$< && \$(HOSTTOOLS) \$(HOSTVARS) ./configure \$(HOSTCONF) \$(${UNAME}_CFG)
 endif
 	cd \$< && \$(MAKE) install
 	touch \$@

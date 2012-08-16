@@ -14,7 +14,7 @@ ifeq ($(call need_pkg,"gdk-pixbuf"),)
 PKGS_FOUND += $(GDK-PIXBUF)
 endif
 
-DEPS_$(GDK-PIXBUF) := jpeg tiff
+DEPS_$(GDK-PIXBUF) = jpeg $(DEPS_jpeg) tiff $(DEPS_tiff)
 
 $(TARBALLS)/$(GDK-PIXBUF_PKG):
 	$(call download,$(GDK-PIXBUF_URL))
@@ -30,9 +30,9 @@ $(GDK-PIXBUF): $(GDK-PIXBUF_PKG) .sum-$(GDK-PIXBUF)
 #	cd $< && NOCONFIGURE=1 ./autogen.sh
 #	cd $< && ./autogen.sh --no-configure
 ifndef HAVE_CROSS_COMPILE
-	cd $< && $(BUILDVARS) $(HOSTOOLS) $(HOSTVARS) ./configure $(HOSTCONF) $(GDK-PIXBUF_CFG)
+	cd $< && $(BUILDVARS) $(HOSTTOOLS) $(HOSTVARS) ./configure $(HOSTCONF) $(GDK-PIXBUF_CFG)
 else
-	cd $< && $(HOSTOOLS) $(HOSTVARS) ./configure $(HOSTCONF) $(GDK-PIXBUF_CFG)
+	cd $< && $(HOSTTOOLS) $(HOSTVARS) ./configure $(HOSTCONF) $(GDK-PIXBUF_CFG)
 endif
 	cd $< && $(MAKE) install
 	touch $@

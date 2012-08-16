@@ -14,6 +14,8 @@ ifeq ($(call need_pkg,"pango"),)
 PKGS_FOUND += $(PANGO)
 endif
 
+DEPS_$(PANGO) = freetype $(DEPS_freetype) cairo $(DEPS_cairo)
+
 $(TARBALLS)/$(PANGO_PKG):
 	$(call download,$(PANGO_URL))
 

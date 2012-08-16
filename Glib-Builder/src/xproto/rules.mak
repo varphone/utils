@@ -28,9 +28,9 @@ $(XPROTO): $(XPROTO_PKG) .sum-$(XPROTO)
 #	cd $< && ./autogen.sh --no-configure
 #	cd $< && autoreconf -v --install
 ifndef HAVE_CROSS_COMPILE
-	cd $< && $(BUILDVARS) $(HOSTOOLS) $(HOSTVARS) ./configure $(HOSTCONF) $(XPROTO_CFG)
+	cd $< && $(BUILDVARS) $(HOSTTOOLS) $(HOSTVARS) ./configure $(HOSTCONF) $(XPROTO_CFG)
 else
-	cd $< && $(HOSTOOLS) $(HOSTVARS) ./configure $(HOSTCONF) $(XPROTO_CFG)
+	cd $< && $(HOSTTOOLS) $(HOSTVARS) ./configure $(HOSTCONF) $(XPROTO_CFG)
 endif
 	cd $< && $(MAKE) install
 	touch $@
