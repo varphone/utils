@@ -234,6 +234,11 @@ esac
 #
 test -e Makefile && unlink Makefile
 ln -sf ../../Main.mak Makefile
+mkdir -p ../src ../tarballs
+ln -sf ../../get-arch.sh ../src/get-arch.sh
+ln -sf ../../gen-rules.sh ../src/gen-rules.sh
+ln -sf ../../gen-sums.sh ../src/gen-sums.sh
+
 cat << EOF
 Bootstrap completed.
 
@@ -251,4 +256,3 @@ Other targets:
  * make package      prepare prebuilt packages
 EOF
 
-mkdir -p ../src ../tarballs

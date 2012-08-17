@@ -7,7 +7,7 @@ do
 		rpath=$(chrpath -l $f|grep "[[PLACEHOLDER]]")
 		[ -n "$rpath" ]	&& {
 			echo "Fixing RPATH of \"$f\""
-			chrpath -r \$ORIGIN:\$ORIGIN/..lib:\$ORIGIN/../../lib $f > /dev/null
+			chrpath -r \$ORIGIN:\$ORIGIN/../lib:\$ORIGIN/../../lib $f > /dev/null
 		}
 	}
 done
