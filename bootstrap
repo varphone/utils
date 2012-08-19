@@ -20,14 +20,13 @@
 #
 usage()
 {
-	echo "Usage: $0 [--build=BUILD] [--host=HOST] [--prefix=PREFIX]"
+	echo "Usage: $0 [--build=BUILD] [--host=HOST] [--target=TARGET] [--prefix=PREFIX]"
 	echo "  --build=BUILD    configure for building on BUILD"
 	echo "  --host=HOST      cross-compile to build to run on HOST"
+	echo "  --target=TARGET      cross-compile to build to run on TARGET"
 	echo "  --prefix=PREFIX  install files in PREFIX"
 	echo "  --disable-FOO    configure to not build package FOO"
 	echo "  --enable-FOO     configure to build package FOO"
-	echo "  --disable-disc   configure to not build optical discs packages"
-	echo "  --disable-sout   configure to not build stream output packages"
 	echo "  --enable-small   optimize libraries for size with slight speed decrease [DANGEROUS]"
 }
 
@@ -58,11 +57,11 @@ do
 		--host=*)
 			HOST="${1#--host=}"
 			;;
+		--target=*)
+			TARGET="${1#--target=}"
+			;;
 		--prefix=*)
 			PREFIX="${1#--prefix=}"
-			;;
-		--disable-disc)
-			BUILD_DISCS=
 			;;
 		--enable-small)
 			ENABLE_SMALL=1
@@ -192,7 +191,6 @@ check_android_sdk()
 }
 
 test -z "$PREFIX" || add_make "PREFIX := $PREFIX"
-test -z "$BUILD_DISCS" || add_make_enabled "BUILD_DISCS"
 test -z "$ENABLE_SMALL" || add_make_enabled "ENABLE_SMALL"
 
 #

@@ -279,6 +279,12 @@ download_git = \
 	(cd $(dir $@) && \
 	tar cvJ $(notdir $(@:.tar.xz=))) > $@ && \
 	rm -Rf $(@:.tar.xz=)
+download_svn = \
+	rm -Rf $(@:.tar.xz=) && \
+	$(SVN) export $(1) $(@:.tar.xz=) && \
+	(cd $(dir $@) && \
+	tar cvJ $(notdir $(@:.tar.xz=))) > $@ && \
+	rm -Rf $(@:.tar.xz=)
 checksum = \
 	$(foreach f,$(filter $(TARBALLS)/%,$^), \
 		grep -- " $(f:$(TARBALLS)/%=%)$$" \
