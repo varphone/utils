@@ -3,15 +3,20 @@
 GCC-CORE := gcc-core
 GCC-CORE_VERSION := git
 GCC-CORE_PKG := gcc-$(GCC-CORE_VERSION).tar.xz
-GCC-CORE_URL := git://gcc-core.gnu.org/git/gcc-core.git --depth=1
-GCC-CORE_CFG := 
+GCC-CORE_URL := git://gcc.gnu.org/git/gcc.git --depth=1
+GCC-CORE_CFG := --target=$(TARGET) --disable-multilib --enable-languages=c,c++ \
+	--disable-ppl-version-check --disable-cloog-version-check --disable-isl-version-check \
+    --enable-lto --enable-cloog-backend=isl --enable-static --disable-shared \
+    --with-sysroot=$(PREFIX) --prefix=$(PREFIX) --with-gmp=$(PREFIX)/$(BUILD) \
+    --with-mpfr=$(PREFIX)/$(BUILD) --with-mpc=$(PREFIX)/$(BUILD) \
+	--with-isl=$(PREFIX)/$(BUILD) --with-cloog=$(PREFIX)/$(BUILD)
 
 PKGS += $(GCC-CORE)
 ifeq ($(call need_pkg,"gcc-core"),)
 PKGS_FOUND += $(GCC-CORE)
 endif
 
-DEPS_$(GCC-CORE) = mingw-w64-headers
+DEPS_$(GCC-CORE) = gmp mpfr mpc isl cloog binutils mingw-w64-headers
 
 $(TARBALLS)/$(GCC-CORE_PKG):
 	$(call download_git,$(GCC-CORE_URL))
@@ -27,9 +32,9 @@ $(GCC-CORE): $(GCC-CORE_PKG) .sum-$(GCC-CORE)
 #	cd $< && NOCONFIGURE=1 ./autogen.sh
 #	cd $< && ./autogen.sh --no-configure
 ifndef HAVE_CROSS_COMPILE
-	cd $< && $(BUILDVARS) $(HOSTTOOLS) $(HOSTVARS) ./configure $(HOSTCONF) $(GCC-CORE_CFG)
+	cd $< && ./configure $(GCC-CORE_CFG)
 else
-	cd $< && $(HOSTTOOLS) $(HOSTVARS) ./configure $(HOSTCONF) $(GCC-CORE_CFG)
+	cd $< && ./configure $(GCC-CORE_CFG)
 endif
-	cd $< && $(MAKE) install
+	cd $< && $(MAKE) all-gcc install-gcc
 	touch $@

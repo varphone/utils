@@ -349,7 +349,7 @@ mostlyclean:
 	-$(RM) -R */
 
 clean: mostlyclean
-	-$(RM) $(TARBALLS)/*.*
+#	-$(RM) $(TARBALLS)/*.*
 
 distclean: clean
 	$(RM) config.mak

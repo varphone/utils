@@ -4,8 +4,8 @@ CLOOG-PPL := cloog-ppl
 CLOOG-PPL_VERSION := 0.15.11
 CLOOG-PPL_PKG := $(CLOOG-PPL)-$(CLOOG-PPL_VERSION).tar.gz
 CLOOG-PPL_URL := ftp://gcc.gnu.org/pub/gcc/infrastructure/$(CLOOG-PPL_PKG)
-CLOOG-PPL_CFG := --target=$(HOST) --prefix=$(PREFIX)/$(HOST)	--disable-static --enable-shared \
-	--with-gmp=$(PREFIX)/$(HOST) --with-ppl=$(PREFIX)/$(HOST) \
+CLOOG-PPL_CFG := --prefix=$(PREFIX)/$(BUILD) --enable-static --disable-shared \
+	--with-gmp=$(PREFIX)/$(BUILD) --with-ppl=$(PREFIX)/$(BUILD) \
 	--with-host-libstdcxx="-lstdc++"
 
 PKGS += $(CLOOG-PPL)
@@ -30,9 +30,9 @@ $(CLOOG-PPL): $(CLOOG-PPL_PKG) .sum-$(CLOOG-PPL)
 	cd $< && NOCONFIGURE=1 ./autogen.sh
 #	cd $< && ./autogen.sh --no-configure
 ifndef HAVE_CROSS_COMPILE
-	cd $< && $(HOSTTOOLS) ./configure $(HOSTCONF) $(CLOOG-PPL_CFG)
+	cd $< && ./configure $(CLOOG-PPL_CFG)
 else
-	cd $< && $(HOSTTOOLS) ./configure $(HOSTCONF) $(CLOOG-PPL_CFG)
+	cd $< && ./configure $(CLOOG-PPL_CFG)
 endif
 	cd $< && $(MAKE) install
 	touch $@

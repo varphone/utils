@@ -4,7 +4,7 @@ GMP := gmp
 GMP_VERSION := 5.0.5
 GMP_PKG := $(GMP)-$(GMP_VERSION).tar.bz2
 GMP_URL := http://ftp.gnu.org/gnu/gmp/$(GMP_PKG)
-GMP_CFG := --target=$(HOST) --prefix=$(PREFIX)/$(HOST) --disable-static --enable-shared --enable-cxx
+GMP_CFG := --prefix=$(PREFIX)/$(BUILD) --enable-static --disable-shared --enable-cxx
 
 PKGS += $(GMP)
 ifeq ($(call need_pkg,"gmp"),)
@@ -27,9 +27,9 @@ $(GMP): $(GMP_PKG) .sum-$(GMP)
 #	cd $< && NOCONFIGURE=1 ./autogen.sh
 #	cd $< && ./autogen.sh --no-configure
 ifndef HAVE_CROSS_COMPILE
-	cd $< && $(HOSTTOOLS) ./configure $(HOSTCONF) $(GMP_CFG)
+	cd $< && ./configure $(GMP_CFG)
 else
-	cd $< && $(HOSTTOOLS) ./configure $(HOSTCONF) $(GMP_CFG)
+	cd $< && ./configure $(GMP_CFG)
 endif
 	cd $< && $(MAKE) install
 	touch $@

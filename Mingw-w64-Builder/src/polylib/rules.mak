@@ -4,7 +4,7 @@ POLYLIB := polylib
 POLYLIB_VERSION := 5.22.5
 POLYLIB_PKG := $(POLYLIB)-$(POLYLIB_VERSION).tar.gz
 POLYLIB_URL := http://icps.u-strasbg.fr/polylib/polylib_src/$(POLYLIB_PKG)
-POLYLIB_CFG := --target=$(HOST) --prefix=$(PREFIX)/$(HOST) --disable-static --enable-shared \
+POLYLIB_CFG := --prefix=$(PREFIX)/$(BUILD) --enable-static --disable-shared \
 	--enable-int-lib --enable-longint-lib --enable-longlongint-lib
 
 PKGS += $(POLYLIB)
@@ -28,9 +28,9 @@ $(POLYLIB): $(POLYLIB_PKG) .sum-$(POLYLIB)
 #	cd $< && NOCONFIGURE=1 ./autogen.sh
 #	cd $< && ./autogen.sh --no-configure
 ifndef HAVE_CROSS_COMPILE
-	cd $< && $(HOSTTOOLS) ./configure $(HOSTCONF) $(POLYLIB_CFG)
+	cd $< && ./configure $(POLYLIB_CFG)
 else
-	cd $< && $(HOSTTOOLS) ./configure $(HOSTCONF) $(POLYLIB_CFG)
+	cd $< && ./configure $(POLYLIB_CFG)
 endif
 	cd $< && $(MAKE) install
 	touch $@

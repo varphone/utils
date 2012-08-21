@@ -4,8 +4,8 @@ MPC := mpc
 MPC_VERSION := 0.9
 MPC_PKG := $(MPC)-$(MPC_VERSION).tar.gz
 MPC_URL := http://www.multiprecision.org/mpc/download/$(MPC_PKG)
-MPC_CFG := --target=$(HOST) --prefix=$(PREFIX)/$(HOST) --enable-static=no --enable-shared=yes \
-	 --with-gmp=$(PREFIX)/$(HOST) --with-mpfr=$(PREFIX)/$(HOST)
+MPC_CFG := --prefix=$(PREFIX)/$(BUILD) --enable-static --disable-shared \
+	 --with-gmp=$(PREFIX)/$(BUILD) --with-mpfr=$(PREFIX)/$(BUILD)
 
 PKGS += $(MPC)
 ifeq ($(call need_pkg,"mpc"),)
@@ -28,9 +28,9 @@ $(MPC): $(MPC_PKG) .sum-$(MPC)
 #	cd $< && NOCONFIGURE=1 ./autogen.sh
 #	cd $< && ./autogen.sh --no-configure
 ifndef HAVE_CROSS_COMPILE
-	cd $< && $(HOSTTOOLS) ./configure $(HOSTCONF) $(MPC_CFG)
+	cd $< && ./configure $(MPC_CFG)
 else
-	cd $< && $(HOSTTOOLS) ./configure $(HOSTCONF) $(MPC_CFG)
+	cd $< && ./configure $(MPC_CFG)
 endif
 	cd $< && $(MAKE) install
 	touch $@

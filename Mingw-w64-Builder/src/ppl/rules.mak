@@ -4,8 +4,8 @@ PPL := ppl
 PPL_VERSION := 1.0
 PPL_PKG := $(PPL)-$(PPL_VERSION).tar.bz2
 PPL_URL := http://bugseng.com/products/ppl/download/ftp/releases/1.0/$(PPL_PKG)
-PPL_CFG := --target=$(HOST) --prefix=$(PREFIX)/$(HOST) --disable-static --enable-shared \
-	--enable-pch --disable-documentation --with-gmp=$(PREFIX)/$(HOST)
+PPL_CFG := --prefix=$(PREFIX)/$(BUILD) --enable-static --disable-shared \
+	--enable-pch --disable-documentation --with-gmp=$(PREFIX)/$(BUILD)
 
 PKGS += $(PPL)
 ifeq ($(call need_pkg,"ppl"),)
@@ -28,9 +28,9 @@ $(PPL): $(PPL_PKG) .sum-$(PPL)
 #	cd $< && NOCONFIGURE=1 ./autogen.sh
 #	cd $< && ./autogen.sh --no-configure
 ifndef HAVE_CROSS_COMPILE
-	cd $< && $(HOSTTOOLS) ./configure $(HOSTCONF) $(PPL_CFG)
+	cd $< && ./configure $(PPL_CFG)
 else
-	cd $< && $(HOSTTOOLS) ./configure $(HOSTCONF) $(PPL_CFG)
+	cd $< && ./configure $(PPL_CFG)
 endif
 	cd $< && $(MAKE) install
 	touch $@
