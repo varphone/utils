@@ -1,0 +1,11 @@
+--- cloog-ppl/configure.in-orig	2012-08-20 23:19:09.157776589 +0800
++++ cloog-ppl/configure.in	2012-08-20 23:20:45.619222598 +0800
+@@ -338,7 +338,7 @@
+ 
+ 	AC_MSG_CHECKING([for version 0.10 (or later revision) of PPL])
+ 	AC_TRY_COMPILE([#include "ppl_c.h"],[
+-	#if PPL_VERSION_MAJOR != 0 || PPL_VERSION_MINOR < 10
++	#if PPL_VERSION_MAJOR == 0 && PPL_VERSION_MINOR < 10
+ 	choke me
+ 	#endif
+ 	], [AC_MSG_RESULT([yes])], [AC_MSG_ERROR(Can't find correct version of PPL.) ])
