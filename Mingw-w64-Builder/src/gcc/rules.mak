@@ -2,9 +2,9 @@
 
 GCC := gcc
 GCC_VERSION := git
-GCC_PKG := $(GCC)-$(GCC_VERSION).tar.xz
-GCC_URL := git://gcc.gnu.org/git/gcc.git --depth=1
-GCC_CFG := --target=$(TARGET) --disable-multilib --enable-languages=c,c++ \
+GCC_PKG := gcc-$(GCC_VERSION).tar.xz
+GCC_URL := git://gcc.gnu.org/git/gcc.git --branch gcc-4_7-branch --depth=1
+GCC_CFG := --target=$(TARGET) --disable-multilib --enable-languages=c,c++,go \
 	--disable-ppl-version-check --disable-cloog-version-check --disable-isl-version-check \
     --enable-lto --enable-cloog-backend=isl --enable-static --disable-shared \
     --with-sysroot=$(PREFIX) --prefix=$(PREFIX) --with-gmp=$(PREFIX)/$(BUILD) \
@@ -16,7 +16,11 @@ ifeq ($(call need_pkg,"gcc"),)
 PKGS_FOUND += $(GCC)
 endif
 
-DEPS_$(GCC) = binutils gcc-core mingw-w64-crt
+DEPS_$(GCC) = binutils gcc-core
+
+ifeq ($(TARGET),i686-w64-mingw32)
+DEPS_$(GCC) += mingw-w64-crt $(DEPS_mingw-w64-crt)
+endif
 
 $(TARBALLS)/$(GCC_PKG):
 	$(call download_git,$(GCC_URL))
@@ -31,7 +35,7 @@ $(GCC): $(GCC_PKG) .sum-$(GCC)
 #	cd $< && $(RECONF)
 #	cd $< && NOCONFIGURE=1 ./autogen.sh
 #	cd $< && ./autogen.sh --no-configure
-	 -mkdir $<-build
+	 mkdir -p $<-build
 ifndef HAVE_CROSS_COMPILE
 	cd $<-build && ../$</configure $(GCC_CFG)
 else
