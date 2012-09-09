@@ -178,6 +178,9 @@ LDFLAGS := $(LDFLAGS) $(EXTRA_LDFLAGS)
 # Do not export those! Use HOSTVARS.
 
 PKG_CONFIG ?= pkg-config
+ifneq ($(ENABLE_SHARED),yes)
+PKG_CONFIG += --static
+endif
 ifdef HAVE_CROSS_COMPILE
 # This inhibits .pc file from within the cross-compilation toolchain sysroot.
 # Hopefully, nobody ever needs that.
@@ -185,9 +188,10 @@ ifdef HAVE_CROSS_COMPILE
 #PKG_CONFIG_LIBDIR := /usr/$(HOST)/lib/pkgconfig
 endif
 LD_LIBRARY_PATH := $(PREFIX)/lib
-PKG_CONFIG_PATH := $(PREFIX)/lib/pkgconfig:/usr/share/pkgconfig
-PKG_CONFIG_LIBDIR := $(PREFIX)/lib/pkgconfig:/usr/$(HOST)/lib/pkgconfig
+PKG_CONFIG_PATH := $(PREFIX)/lib/pkgconfig:$(PREFIX)/share/pkgconfig
+PKG_CONFIG_LIBDIR := $(PREFIX)/lib/pkgconfig
 export LD_LIBRARY_PATH
+export PKG_CONFIG
 export PKG_CONFIG_PATH
 export PKG_CONFIG_LIBDIR
 
@@ -246,7 +250,17 @@ HOSTCONF := --prefix=$(PREFIX)
 HOSTCONF += --build=$(BUILD) --host=$(HOST) --target=$(HOST)
 HOSTCONF += --program-prefix=""
 # libtool stuff:
-HOSTCONF += --enable-static --enable-shared --disable-dependency-tracking
+ifeq ($(ENABLE_STATIC),yes)
+HOSTCONF += --enable-static
+else
+HOSTCONF += --disable-static
+endif
+ifeq ($(ENABLE_SHARED),yes)
+HOSTCONF += --enable-shared
+else
+HOSTCONF += --disable-shared
+endif
+HOSTCONF += --disable-dependency-tracking
 ifdef HAVE_WIN32
 HOSTCONF += --without-pic
 PIC :=
@@ -255,21 +269,24 @@ HOSTCONF += --with-pic
 PIC := -fPIC
 endif
 
-BUILDVARS := \
+EXTRA_CFLAGS  :=
+EXTRA_LDFLAGS :=
+
+BUILDVARS = \
 	PATH=$(PREFIX)/bin:$(PATH)
-HOSTTOOLS := \
+HOSTTOOLS = \
 	CC="$(CC)" CXX="$(CXX)" LD="$(LD)" \
 	AR="$(AR)" RANLIB="$(RANLIB)" STRIP="$(STRIP)"
-HOSTVARS := \
-	CPPFLAGS="$(CPPFLAGS)" \
-	CFLAGS="$(CFLAGS)" \
-	CXXFLAGS="$(CXXFLAGS)" \
-	LDFLAGS="$(LDFLAGS)"
-HOSTVARS_PIC := \
-	CPPFLAGS="$(CPPFLAGS) $(PIC)" \
-	CFLAGS="$(CFLAGS) $(PIC)" \
-	CXXFLAGS="$(CXXFLAGS) $(PIC)" \
-	LDFLAGS="$(LDFLAGS)"
+HOSTVARS = \
+	CPPFLAGS="$(CPPFLAGS) $(EXTRA_CFLAGS)" \
+	CFLAGS="$(CFLAGS) $(EXTRA_CFLAGS)" \
+	CXXFLAGS="$(CXXFLAGS) $(EXTRA_CFLAGS)" \
+	LDFLAGS="$(LDFLAGS) $(EXTRA_LDFLAGS)"
+HOSTVARS_PIC = \
+	CPPFLAGS="$(CPPFLAGS) $(EXTRA_CFLAGS) $(PIC)" \
+	CFLAGS="$(CFLAGS) $(EXTRA_CFLAGS) $(PIC)" \
+	CXXFLAGS="$(CXXFLAGS) $(EXTRA_CFLAGS) $(PIC)" \
+	LDFLAGS="$(LDFLAGS) $(EXTRA_LDFLAGS)"
 
 download_git = \
 	rm -Rf $(@:.tar.xz=) && \

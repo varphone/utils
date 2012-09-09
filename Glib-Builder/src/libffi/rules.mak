@@ -8,8 +8,8 @@ LIBFFI_CFG = --build=$(BUILD) --host=$(HOST) --prefix=$(PREFIX) \
 	--disable-builddir --disable-shared
 
 PKGS += $(LIBFFI)
-ifeq ($(call need_pkg,"zlib"),)
-PKGS_FOUND += $(LIBFFI)
+ifeq ($(call need_pkg,"libffi"),)
+#PKGS_FOUND += $(LIBFFI)
 endif
 
 $(TARBALLS)/$(LIBFFI_PKG):

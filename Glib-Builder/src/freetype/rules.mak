@@ -9,7 +9,7 @@ FREETYPE_CFG := --build=$(BUILD) --host=$(HOST) --prefix=$(PREFIX) \
 
 PKGS += $(FREETYPE)
 ifeq ($(call need_pkg,"freetype"),)
-PKGS_FOUND += $(FREETYPE)
+#PKGS_FOUND += $(FREETYPE)
 endif
 
 $(TARBALLS)/$(FREETYPE_PKG):

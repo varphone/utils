@@ -1,0 +1,26 @@
+diff -ru DirectFB.orig/src/Makefile.am DirectFB/src/Makefile.am
+--- DirectFB/src/Makefile.am	2012-09-10 00:20:45.595619040 +0800
++++ DirectFB/src/Makefile.am	2012-09-10 00:21:34.940359426 +0800
+@@ -53,6 +53,7 @@
+ 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)	\
+ 	-release $(LT_RELEASE)					\
+ 	$(DFB_LDFLAGS)
++	-static-libtool-libs -libstdc++
+ 
+ 
+ if DIRECTFB_BUILD_PURE_VOODOO
+diff -ru DirectFB.orig/tools/Makefile.am DirectFB/tools/Makefile.am
+--- DirectFB/tools/Makefile.am	2012-06-30 00:01:11.000000000 +0800
++++ DirectFB/tools/Makefile.am	2012-09-10 01:16:06.019829018 +0800
+@@ -83,9 +83,9 @@
+ 
+ 
+ 
+-libdirectfb = ../src/libdirectfb.la
++libdirectfb = ../src/libdirectfb.la -lstdc++
+ libfusion = ../lib/fusion/libfusion.la
+-libdirect = ../lib/direct/libdirect.la
++libdirect = ../lib/direct/libdirect.la -ldl
+ 
+ if DIRECTFB_BUILD_ONE
+ libone = \

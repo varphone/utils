@@ -8,7 +8,7 @@ LIBXML2_CFG := --with-minimal --with-catalog --with-reader --with-tree --with-pu
 
 PKGS += $(LIBXML2)
 ifeq ($(call need_pkg,"libxml-2.0"),)
-#PKGS_FOUND += $(LIBXML2)
+PKGS_FOUND += $(LIBXML2)
 endif
 
 DEPS_$(LIBXML2) =

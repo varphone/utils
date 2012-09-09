@@ -8,7 +8,7 @@ JPEG_CFG :=
 
 PKGS += $(JPEG)
 ifeq ($(call need_pkg,"jpeg"),)
-PKGS_FOUND += $(JPEG)
+#PKGS_FOUND += $(JPEG)
 endif
 
 DEPS_$(JPEG) :=

@@ -8,7 +8,7 @@ LIBPNG_CFG :=
 
 PKGS += $(LIBPNG)
 ifeq ($(call need_pkg,"libpng"),)
-#PKGS_FOUND += $(LIBPNG)
+PKGS_FOUND += $(LIBPNG)
 endif
 
 DEPS_$(LIBPNG) = zlib $(DEPS_zlib)

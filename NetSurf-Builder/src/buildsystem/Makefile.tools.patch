@@ -1,0 +1,15 @@
+diff -ru buildsystem.orig/makefiles/Makefile.tools buildsystem/makefiles/Makefile.tools
+--- buildsystem/makefiles/Makefile.tools	2012-09-09 09:34:04.000000000 +0800
++++ buildsystem/makefiles/Makefile.tools	2012-09-09 10:39:57.000000000 +0800
+@@ -515,9 +515,9 @@
+ # TODO: This assumes that the C compiler can cope with assembler
+ ASFLAGS ?= $(CCAS)
+ 
+-CFLAGS := $(CFLAGS) $(OPTCFLAGS) $(CCDEF)BUILD_TARGET_$(TARGET) $(CCDEF)BUILD_HOST_$(HOST)
++CFLAGS := $(CFLAGS) $(OPTCFLAGS) $(CCDEF)BUILD_TARGET_$(subst -,_,$(TARGET)) $(CCDEF)BUILD_HOST_$(subst -,_,$(HOST))
+ CXXFLAGS := $(CXXFLAGS) $(OPTCXXFLAGS) \
+-		$(CXXDEF)BUILD_TARGET_$(TARGET) $(CXXDEF)BUILD_HOST_$(HOST)
++		$(CXXDEF)BUILD_TARGET_$(subst -,_,$(TARGET)) $(CXXDEF)BUILD_HOST_$(subst -,_,$(HOST))
+ 
+ ASFLAGS := $(ASFLAGS) $(CFLAGS)
+ LDFLAGS := $(LDFLAGS) $(OPTLDFLAGS)

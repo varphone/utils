@@ -8,7 +8,7 @@ ZLIB_CFG = --static --prefix=$(PREFIX)
 
 PKGS += $(ZLIB)
 ifeq ($(call need_pkg,"zlib"),)
-#PKGS_FOUND += $(ZLIB)
+PKGS_FOUND += $(ZLIB)
 endif
 
 $(TARBALLS)/$(ZLIB_PKG):

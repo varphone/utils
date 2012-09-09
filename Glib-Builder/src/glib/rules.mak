@@ -12,7 +12,7 @@ endif
 
 PKGS += $(GLIB)
 ifeq ($(call need_pkg,"glib-2.0"),)
-PKGS_FOUND += $(GLIB)
+#PKGS_FOUND += $(GLIB)
 endif
 
 DEPS_$(GLIB) := zlib dbus libffi libxml2

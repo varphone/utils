@@ -12,7 +12,7 @@ DBUS_CFG := --enable-static=yes --enable-abstract-sockets \
 
 PKGS += $(DBUS)
 ifeq ($(call need_pkg,"dbus-1"),)
-PKGS_FOUND += $(DBUS)
+#PKGS_FOUND += $(DBUS)
 endif
 
 DEPS_$(DBUS) := libxml2 $(DEPS_libxml2)

@@ -8,7 +8,7 @@ LIBFLAC_CFG :=
 
 PKGS += $(LIBFLAC)
 ifeq ($(call need_pkg,"libflac"),)
-PKGS_FOUND += $(LIBFLAC)
+#PKGS_FOUND += $(LIBFLAC)
 endif
 
 DEPS_$(LIBFLAC) :=

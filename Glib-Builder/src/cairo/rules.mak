@@ -4,19 +4,24 @@ CAIRO := cairo
 CAIRO_VERSION := 1.12.2
 CAIRO_PKG := $(CAIRO)-$(CAIRO_VERSION).tar.xz
 CAIRO_URL := http://cairographics.org/releases/$(CAIRO_PKG)
-CAIRO_CFG := --enable-silent-rules --enable-gtk-doc-html=no \
-	--enable-xlib=yes --enable-xlib-xrender=no --enable-xcb=yes --enable-xlib-xcb=yes \
-	--enable-xcb-shm=no --enable-skia=no --enable-os2=no --enable-drm=no \
-	--enable-gallium=no --enable-gobject=yes
+CAIRO_CFG := --enable-silent-rules --enable-shared=no --enable-static=yes \
+	--disable-gtk-doc --enable-interpreter=no --enable-trace=no \
+	--enable-skia=no --enable-os2=no --enable-drm=no --enable-gallium=no \
+	--enable-qt=no --enable-quartz=no --enable-win32=no \
+	--enable-gl=yes --enable-glesv2=no --enable-gobject=yes \
+	--enable-test-surfaces=no
 
 PKGS += $(CAIRO)
 ifeq ($(call need_pkg,"cairo"),)
-PKGS_FOUND += $(CAIRO)
+#PKGS_FOUND += $(CAIRO)
 endif
 
-DEPS_$(CAIRO) = freetype $(DEPS_freetype )fontconfig $(DEPS_fontconfig) \
-	libpng $(DEPS_libpng) libX11 $(DEPS_libX11) libXrender $(DEPS_libXrender) \
-	pixman $(DEPS_pixman)
+DEPS_$(CAIRO) = freetype fontconfig libpng pixman
+
+ifdef HAVE_LINUX
+CAIRO_CFG += --enable-xlib-xrender=no -enable-pthread=yes --enable-directfb=yes
+DEPS_$(CAIRO) += DirectFB
+endif
 
 $(TARBALLS)/$(CAIRO_PKG):
 	$(call download,$(CAIRO_URL))

@@ -4,14 +4,14 @@ ATK := atk
 ATK_VERSION := 2.5.4
 ATK_PKG := $(ATK)-$(ATK_VERSION).tar.xz
 ATK_URL := http://ftp.gnome.org/pub/gnome/sources/atk/2.5/$(ATK_PKG)
-ATK_CFG := PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig
+ATK_CFG := --with-sysroot=$(PREFIX)
 
 PKGS += $(ATK)
 ifeq ($(call need_pkg,"atk"),)
-PKGS_FOUND += $(ATK)
+#PKGS_FOUND += $(ATK)
 endif
 
-DEPS_$(ATK) := glib
+DEPS_$(ATK) = glib
 
 $(TARBALLS)/$(ATK_PKG):
 	$(call download,$(ATK_URL))

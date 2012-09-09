@@ -9,10 +9,11 @@ GCC_PKG := gcc-4.7-20120825.tar.bz2
 GCC_URL := ftp://gcc.gnu.org/pub/gcc/snapshots/4.7-20120825/gcc-4.7-20120825.tar.bz2
 GCC_CFG := --target=$(TARGET) --disable-multilib --enable-languages=c,c++,go \
 	--disable-ppl-version-check --disable-cloog-version-check --disable-isl-version-check \
-    --enable-lto --enable-cloog-backend=isl --enable-static --disable-shared \
-    --with-sysroot=$(PREFIX) --prefix=$(PREFIX) --with-gmp=$(PREFIX)/$(BUILD) \
-    --with-mpfr=$(PREFIX)/$(BUILD) --with-mpc=$(PREFIX)/$(BUILD) \
-	--with-isl=$(PREFIX)/$(BUILD) --with-cloog=$(PREFIX)/$(BUILD)
+	--enable-lto --enable-cloog-backend=isl --enable-static --disable-shared \
+	--with-sysroot=$(PREFIX) --prefix=$(PREFIX) --with-gmp=$(PREFIX)/$(BUILD) \
+	--with-mpfr=$(PREFIX)/$(BUILD) --with-mpc=$(PREFIX)/$(BUILD) \
+	--with-isl=$(PREFIX)/$(BUILD) --with-cloog=$(PREFIX)/$(BUILD) \
+	--with-host-libstdcxx="-lstdc++ -lm"
 
 PKGS += $(GCC)
 ifeq ($(call need_pkg,"gcc"),)

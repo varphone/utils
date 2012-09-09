@@ -11,7 +11,7 @@ endif
 
 PKGS += $(GDK-PIXBUF)
 ifeq ($(call need_pkg,"gdk-pixbuf"),)
-PKGS_FOUND += $(GDK-PIXBUF)
+#PKGS_FOUND += $(GDK-PIXBUF)
 endif
 
 DEPS_$(GDK-PIXBUF) = jpeg $(DEPS_jpeg) tiff $(DEPS_tiff)

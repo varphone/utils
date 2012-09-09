@@ -34,9 +34,10 @@ BUILD=
 HOST=
 TARGET=
 PREFIX=
+ENABLE_SHARED=no
+ENABLE_STATIC=yes
 PKGS_ENABLE=
 PKGS_DISABLE=
-BUILD_DISCS="1"
 
 if test ! -f "../../Main.mak"
 then
@@ -65,6 +66,18 @@ do
 			;;
 		--enable-small)
 			ENABLE_SMALL=1
+			;;
+		--enable-shared)
+			ENABLE_SHARED=1
+			;;
+		--enable-static)
+			ENABLE_STATIC=yes
+			;;
+		--disable-shared)
+			ENABLE_SHARED=no
+			;;
+		--disable-static)
+			ENABLE_STATIC=no
 			;;
 		--disable-*)
 			PKGS_DISABLE="${PKGS_DISABLE} ${1#--disable-}"
@@ -113,11 +126,13 @@ exec 3>config.mak
 cat >&3 << EOF
 # This file was automatically generated.
 # Any change will be overwritten if ../bootstrap is run again.
-BUILD := ${BUILD}
-HOST := ${HOST}
+BUILD  := ${BUILD}
+HOST   := ${HOST}
 TARGET := ${TARGET}
+ENABLE_SHARED := ${ENABLE_SHARED}
+ENABLE_STATIC := ${ENABLE_STATIC}
 PKGS_DISABLE := ${PKGS_DISABLE}
-PKGS_ENABLE := ${PKGS_ENABLE}
+PKGS_ENABLE  := ${PKGS_ENABLE}
 EOF
 
 add_make()
