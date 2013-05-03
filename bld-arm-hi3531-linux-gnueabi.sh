@@ -28,19 +28,20 @@ build_host_lib()
 	CFLAGS=${HOST_CFLAGS} CXXFLAGS=${HOST_CXXFLAGS} LDFLAGS=${HOST_LDFLAGS} ./configure --build=${HOST} --host=${HOST} --target=${HOST} --disable-shared --prefix=${HOST_SYSROOT} || exit 1
 	make || exit 1
 	make install || exit 1
+	make distclean
 	popd
 }
 
 build_binutils()
 {
 	[ -d "$1" ] || exit 1
-	mkdir -p binutils-build
-	pushd binutils-build
+	mkdir -p build-binutils
+	pushd build-binutils
 	 CFLAGS="${HOST_CFLAGS}" CXXFLAGS="${HOST_CXXFLAGS}" LDFLAGS="${HOST_LDFLAGS}" ../$1/configure --build=${HOST} --host=${HOST} --target=${TARGET} --disable-shared --prefix=${TARGET_SYSROOT} || exit 1
 	make -j4 || exit 1
 	make install || exit 1
 	popd
-	rm -rf binutils-build
+	rm -rf build-binutils
 }
 
 build_gcc()
