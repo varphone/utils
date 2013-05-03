@@ -70,7 +70,6 @@ build_gcc()
 	popd
 	rm -rf build-gcc
 }
-#--with-sysroot=${TARGET_SYSROOT}
 
 build_glibc()
 {
