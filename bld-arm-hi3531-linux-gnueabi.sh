@@ -39,10 +39,16 @@ TARGET_LDFLAGS="-Wl,-EL"
 TARGET_HEADERS="-I${TARGET_SYSROOT}/usr/include"
 TARGET_LIBS="-L${TARGET_SYSROOT}/usr/lib"
 TARGET_VARS="CC=${TARGET}-gcc CXX=${TARGET}-g++ AR=${TARGET}-ar AS=${TARGET}-as LD=${TARGET}-ld RANLIB=${TARGET}-ranlib STRIP=${TARGET}-strip"
+TARGET_TARBALLS=${TARGET_ROOT}/${TARGET}/tarballs
 
 PKG_VERSION="VCT v100 for Hi3531(gcc-4.8.0,glibc-2.16,eabi,ntpl)"
 BUGURL="mailto://varphone@foxmail.com"
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+check_dirs()
+{
+	[ -d "${TARGET_TARBALLS}" ] || mkdir -p "${TARGET_TARBALLS}"
+}
 
 build_linux_headers()
 {
@@ -218,18 +224,42 @@ build_glibc()
     }
 }
 
+build_target_busybox()
+{
+	[ -d "$1" ] || exit 1
+    [ -f .$1.$2.ok ] || {
+	    pushd $1
+	    PATH_ORIG=${PATH}
+	    export PATH=${TARGET_ROOT}/bin:${PATH}
+		make $2
+		make -j4 -l || exit
+		make install || exit
+   		export PATH=${PATH_ORIG}
+		pushd _install
+		fakeroot tar zcvf "${TARGET_TARBALLS}/$1.tgz" *
+		popd
+		make distclean
+		popd
+		touch .$1.$2.ok
+	}
+}
+
 pack_runtime_libs()
 {
 	pushd "${TARGET_SYSROOT}"
 	cp -aP ../lib/libgcc_s.so* lib/
 	chmod a+x lib/libgcc_s.so*
-	tar zcvf lib.glibc.tgz lib
+	fakeroot tar zcvf "${TARGET_TARBALLS}/lib.glibc.tgz" lib
 	rm lib/libgcc_s.so*
 	popd
 	pushd "${TARGET_ROOT}/${TARGET}"
-	tar zcvf sysroot/lib.stdc++.tgz lib/libstdc++.so.6.0.18 lib/libstdc++.so.6 lib/libstdc++.so
+	fakeroot tar zcvf "${TARGET_TARBALLS}/lib.stdc++.tgz" lib/libstdc++.so.6.0.18 lib/libstdc++.so.6 lib/libstdc++.so
 	popd
 }
+
+echo "========================================================================="
+echo "Checking environments ..."
+check_dirs
 
 echo "========================================================================="
 echo "Preparing kernel headers ..."
@@ -282,6 +312,10 @@ echo "Building qt for target ..."
 	EXTRA_CONF="-shared -prefix ${TARGET_SYSROOT}/usr/local/qt-4.8.4"
 	build_target_lib_qt qt-everywhere-opensource-src-4.8.4
 )
+
+echo "========================================================================="
+echo "Building busybox for target ..."
+build_target_busybox busybox-1.21.0 hi3531_defconfig
 
 echo "========================================================================="
 echo "Packing for glibc and stdc++ runtime libraries ..."
