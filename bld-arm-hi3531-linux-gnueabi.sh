@@ -18,9 +18,9 @@ TARGET_SYSROOT=${TARGET_ROOT}/${TARGET}/sysroot
 #TARGET_CFLAGS="-Os -g -pipe -mlittle-endian -march=armv7-a -mcpu=cortex-a9 -mfloat-abi=softfp -mfpu=vfpv3-d16"
 #TARGET_CXXFLAGS="-Os -g -pipe -mlittle-endian -march=armv7-a -mcpu=cortex-a9 -mfloat-abi=softfp -mfpu=vfpv3-d16"
 #TARGET_LDFLAGS="-Wl,-EL"
-TARGET_CFLAGS="Os -g -pipe"
-TARGET_CXXFLAGS="Os -g -pipe"
-TARGET_LDFLAGS="Wl,-EL"
+TARGET_CFLAGS="-Os -g -pipe"
+TARGET_CXXFLAGS="-Os -g -pipe"
+TARGET_LDFLAGS="-Wl,-EL"
 
 PKG_VERSION="VCT v100 for Hi3531(gcc-4.8.0,glibc-2.16,eabi,ntpl)"
 BUGURL="mailto://varphone@foxmail.com"
@@ -116,7 +116,7 @@ build_glibc()
 	    		PATH_ORIG=${PATH}
 	    		export PATH=${TARGET_ROOT}/bin:${PATH}
 	    		cp ../$1/Makeconfig.shared ../$1/Makeconfig
-	    		CFLAGS="${TARGET_CFLAGS}" CXXFLAGS="${TARGET_CXXFLAGS}" LDFLAGS="${TARGET_LDFLAGS}" ../$1/configure --host=${TARGET} --prefix=/usr --enable-add-ons --with-headers=${TARGET_SYSROOT}/usr/include --with-pkgversion="${PKG_VERSION}" --with-bugurl="${BUGURL}" || exit 1
+	    		CFLAGS="${TARGET_CFLAGS}" CXXFLAGS="${TARGET_CXXFLAGS}" LDFLAGS="${TARGET_LDFLAGS}" ../$1/configure --host=${TARGET} --prefix=/usr --enable-add-ons --enable-obsolete-rpc --with-headers=${TARGET_SYSROOT}/usr/include --with-pkgversion="${PKG_VERSION}" --with-bugurl="${BUGURL}" || exit 1
 	    		make -j4 -l || exit 1
 	    		make -j4 -l install_root=${TARGET_SYSROOT} install || exit 1
 	    		export PATH=${PATH_ORIG}
@@ -125,7 +125,7 @@ build_glibc()
 	    		PATH_ORIG=${PATH}
 	    		export PATH=${TARGET_ROOT}/bin:${PATH}
 	    		cp ../$1/Makeconfig.shared ../$1/Makeconfig
-	    		CFLAGS="${TARGET_CFLAGS}" CXXFLAGS="${TARGET_CXXFLAGS}" LDFLAGS="${TARGET_LDFLAGS}" ../$1/configure --host=${TARGET} --prefix=/usr --enable-add-ons --with-headers=${TARGET_SYSROOT}/usr/include --with-pkgversion="${PKG_VERSION}" --with-bugurl="${BUGURL}" || exit 1
+	    		CFLAGS="${TARGET_CFLAGS}" CXXFLAGS="${TARGET_CXXFLAGS}" LDFLAGS="${TARGET_LDFLAGS}" ../$1/configure --host=${TARGET} --prefix=/usr --enable-add-ons --enable-obsolete-rpc --with-headers=${TARGET_SYSROOT}/usr/include || exit 1
 	    		make -j4 -l || exit 1
 	    		make -j4 -l install_root=${TARGET_SYSROOT} install || exit 1
 	    		export PATH=${PATH_ORIG}
@@ -138,7 +138,6 @@ build_glibc()
         touch .$1.$2.ok
     }
 }
-# -fno-exceptions -fno-unwind-tables -fno-asynchronous-unwind-tables
 
 build_linux_headers linux-3.0.y
 build_host_lib gmp-5.1.1
