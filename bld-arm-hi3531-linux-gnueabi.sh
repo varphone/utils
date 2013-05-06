@@ -125,7 +125,7 @@ build_target_lib_qt()
     	pushd "build-$1"
    		PATH_ORIG=${PATH}
    		export PATH=${TARGET_ROOT}/bin:${PATH}
-	    CFLAGS="${TARGET_HEADERS}" CXXFLAGS="${TARGET_HEADERS}" LDFLAGS="${TARGET_LDFLAGS} ${TARGET_LIBS}" ../$1/configure -opensource -confirm-license -embedded arm -xplatform linux-arm-hi3531-gnueabi-g++ -release -fast -little-endian -qt-gfx-qvfb -qt-kbd-qvfb -qt-mouse-qvfb -nomake demos -nomake examples -no-rpath -no-pch -no-glib -no-webkit -no-qt3support ${EXTRA_CONF} || exit 1
+	    CFLAGS="${TARGET_HEADERS}" CXXFLAGS="${TARGET_HEADERS}" LDFLAGS="${TARGET_LDFLAGS} ${TARGET_LIBS}" ../$1/configure -opensource -confirm-license -embedded arm -xplatform qws/linux-arm-hi3531-gnueabi-g++ -release -fast -little-endian -qt-sql-sqlite -plugin-sql-sqlite -qt-gfx-linuxfb -qt-zlib -qt-libtiff -qt-libpng -qt-libjpeg -no-rpath -no-pch -no-glib -no-webkit -no-qt3support -no-phonon -no-script -no-scripttools -no-declarative -no-declarative-debug -no-3dnow -no-avx -no-neon -no-openssl -no-nis -no-cups -no-dbus -no-opengl -no-libmng -nomake demos -nomake examples -nomake docs ${EXTRA_CONF} || exit 1
 	    make -j4 || exit 1
     	make install || exit 1
 	    popd
@@ -232,13 +232,13 @@ build_target_busybox()
 	    PATH_ORIG=${PATH}
 	    export PATH=${TARGET_ROOT}/bin:${PATH}
 		make $2
-		make -j4 -l || exit
-		make install || exit
-   		export PATH=${PATH_ORIG}
+		make -j4 -l || exit 1
+		make install || exit 1
 		pushd _install
 		fakeroot tar zcvf "${TARGET_TARBALLS}/$1.tgz" *
 		popd
 		make distclean
+  		export PATH=${PATH_ORIG}
 		popd
 		touch .$1.$2.ok
 	}
@@ -246,15 +246,27 @@ build_target_busybox()
 
 pack_runtime_libs()
 {
+    # tar glibc libs
 	pushd "${TARGET_SYSROOT}"
 	cp -aP ../lib/libgcc_s.so* lib/
 	chmod a+x lib/libgcc_s.so*
 	fakeroot tar zcvf "${TARGET_TARBALLS}/lib.glibc.tgz" lib
 	rm lib/libgcc_s.so*
 	popd
+    # tar stdc++ libs
 	pushd "${TARGET_ROOT}/${TARGET}"
 	fakeroot tar zcvf "${TARGET_TARBALLS}/lib.stdc++.tgz" lib/libstdc++.so.6.0.18 lib/libstdc++.so.6 lib/libstdc++.so
 	popd
+    # tar qt libs
+    pushd "${TARGET_SYSROOT}/usr/local/qt-4.8.4"
+    cp -aP plugins lib/
+    fakeroot tar --transform 's,^,/usr/,S' -zcvf "${TARGET_TARBALLS}/lib.qt.tgz" lib/lib*.so* lib/fonts lib/plugins
+    rm -rf lib/plugins
+    popd
+    # tar sqlite3 tool & libs
+    pushd "${TARGET_SYSROOT}"
+    fakeroot tar -zcvf "${TARGET_TARBALLS}/sqlite3.tgz" usr/bin/sqlite3 usr/lib/libsqlite3.so*
+    popd
 }
 
 echo "========================================================================="
@@ -311,11 +323,36 @@ echo "Building qt for target ..."
 (
 	EXTRA_CONF="-shared -prefix ${TARGET_SYSROOT}/usr/local/qt-4.8.4"
 	build_target_lib_qt qt-everywhere-opensource-src-4.8.4
-)
+    fix_install=${TARGET_SYSROOT}/usr/local/qt-4.8.4/fix_install.sh
+    echo "/bin/bash" > ${fix_install}
+    echo "echo \"/bin/bash\" > bin/qt.conf" >> ${fix_install}
+    echo "echo \"[Paths]\" >> bin/qt.conf" >> ${fix_install}
+    echo "echo \"Prefix=\$(pwd)\" >> bin/qt.conf" >> ${fix_install}
+    chmod a+x ${fix_install}
+) || exit 1
+
+echo "========================================================================="
+echo "Building gettext for target ..."
+build_target_lib gettext-0.18.2
+
+echo "========================================================================="
+echo "Building readline for target ..."
+build_target_lib readline-6.2
+
+echo "========================================================================="
+echo "Building sqlite3 for target ..."
+build_target_lib sqlite-autoconf-3071602
 
 echo "========================================================================="
 echo "Building busybox for target ..."
 build_target_busybox busybox-1.21.0 hi3531_defconfig
+
+echo "========================================================================="
+echo "Building bash for target ..."
+(
+    export ${TARGET_VARS} EXTRA_CFLAGS="-static" EXTRA_CONF="--enable-job-control --enable-static-link --disable-nls --disable-rpath --without-bash-malloc"
+    #build_target_app bash-4.2
+) || exit 1
 
 echo "========================================================================="
 echo "Packing for glibc and stdc++ runtime libraries ..."
