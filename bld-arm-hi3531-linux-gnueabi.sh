@@ -263,10 +263,11 @@ pack_runtime_libs()
     fakeroot tar --transform 's,^,/usr/,S' -zcvf "${TARGET_TARBALLS}/lib.qt.tgz" lib/lib*.so* lib/fonts lib/plugins
     rm -rf lib/plugins
     popd
-    # tar sqlite3 tool & libs
+    # tar sqlite3, lua, ... tools & libs
     pushd "${TARGET_SYSROOT}"
+    fakeroot tar -zcvf "${TARGET_TARBALLS}/luajit2.tgz" usr/bin/luajit* usr/lib/libluajit*.so* usr/share/lua usr/share/luajit-2.0.1
     fakeroot tar -zcvf "${TARGET_TARBALLS}/sqlite3.tgz" usr/bin/sqlite3 usr/lib/libsqlite3.so*
-    popd
+    popd    
 }
 
 echo "========================================================================="
@@ -332,16 +333,52 @@ echo "Building qt for target ..."
 ) || exit 1
 
 echo "========================================================================="
+echo "Building freetype2 for target ..."
+build_target_lib freetype-2.4.12
+
+echo "========================================================================="
+echo "Building gdbm for target ..."
+build_target_lib gdbm-1.10
+
+echo "========================================================================="
 echo "Building gettext for target ..."
 build_target_lib gettext-0.18.2
+
+echo "========================================================================="
+echo "Building libpcap for target ..."
+EXTRA_CONF="--with-pcap=linux" build_target_lib libpcap-1.3.0
 
 echo "========================================================================="
 echo "Building readline for target ..."
 build_target_lib readline-6.2
 
 echo "========================================================================="
+echo "Building pcre for target ..."
+build_target_lib pcre-8.32
+
+echo "========================================================================="
 echo "Building sqlite3 for target ..."
 build_target_lib sqlite-autoconf-3071602
+
+echo "========================================================================="
+echo "Building zlib for target ..."
+(
+    src=zlib-1.2.8
+	[ -d "${src}" ] || exit 1
+    [ -f .${src}.${TARGET}.ok ] || {
+        pushd zlib-1.2.8
+        export ${TARGET_VARS}
+	    PATH_ORIG=${PATH}
+	    export PATH=${TARGET_ROOT}/bin:${PATH}
+        ./configure --prefix=${TARGET_SYSROOT}/usr
+        make -j4 -l || exit 1
+        make install || exit 1
+        make clean
+   		export PATH=${PATH_ORIG}
+        popd
+        touch .${src}.${TARGET}.ok
+    }
+) || exit 1
 
 echo "========================================================================="
 echo "Building busybox for target ..."
@@ -353,6 +390,42 @@ echo "Building bash for target ..."
     export ${TARGET_VARS} EXTRA_CFLAGS="-static" EXTRA_CONF="--enable-job-control --enable-static-link --disable-nls --disable-rpath --without-bash-malloc"
     #build_target_app bash-4.2
 ) || exit 1
+
+echo "========================================================================="
+echo "Building e2fsprogs for target ..."
+EXTRA_CONF="--enable-symlink-install --enable-relative-symlinks --enable-symlink-build --disable-debugfs --disable-imager --disable-tls --disable-uuidd --disable-nls --disable-rpath" build_target_app e2fsprogs-1.42.7
+
+echo "========================================================================="
+echo "Building iperf for target ..."
+build_target_app iperf-3.0b5
+
+echo "========================================================================="
+echo "Building Luajit for target ..."
+(
+    src=LuaJIT-2.0.1
+	[ -d "${src}" ] || exit 1
+    [ -f .${src}.${TARGET}.ok ] || {
+        pushd ${src}
+        export ${TARGET_VARS}
+	    PATH_ORIG=${PATH}
+	    export PATH=${TARGET_ROOT}/bin:${PATH}
+        make HOST_CC="gcc -m32" CROSS=${TARGET}- PREFIX=/usr
+        make install PREFIX=/usr DESTDIR="${TARGET_SYSROOT}"
+        make clean
+   		export PATH=${PATH_ORIG}
+        popd
+        touch .${src}.${TARGET}.ok
+    }
+) || exit 1
+
+echo "========================================================================="
+echo "Building tcpdump for target ..."
+ac_cv_linux_vers=3.0 build_target_app tcpdump-4.3.0
+
+echo "========================================================================="
+echo "Strip all target binaries ..."
+${TARGET_ROOT}/bin/${TARGET}-strip ${TARGET_SYSROOT}/usr/bin/*
+${TARGET_ROOT}/bin/${TARGET}-strip ${TARGET_SYSROOT}/usr/sbin/*
 
 echo "========================================================================="
 echo "Packing for glibc and stdc++ runtime libraries ..."
