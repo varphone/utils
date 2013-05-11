@@ -47,7 +47,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 check_dirs()
 {
-    [ -d "${TARGET_TARBALLS}" ] || mkdir -p "${TARGET_TARBALLS}"
+	[ -d "${TARGET_TARBALLS}" ] || mkdir -p "${TARGET_TARBALLS}"
 }
 
 build_linux_headers()
@@ -345,6 +345,10 @@ echo "Building gettext for target ..."
 build_target_lib gettext-0.18.2
 
 echo "========================================================================="
+echo "Building libevent for target ..."
+EXTRA_CONF="--disable-openssl --disable-debug-mode --enable-function-sections" build_target_lib libevent-2.1.3-alpha
+
+echo "========================================================================="
 echo "Building libpcap for target ..."
 EXTRA_CONF="--with-pcap=linux" build_target_lib libpcap-1.3.0
 
@@ -355,6 +359,25 @@ build_target_lib readline-6.2
 echo "========================================================================="
 echo "Building pcre for target ..."
 build_target_lib pcre-8.32
+
+echo "========================================================================="
+echo "Building polarssl for target ..."
+(
+    src=polarssl-1.2.7
+	[ -d "${src}" ] || exit 1
+    [ -f .${src}.${TARGET}.ok ] || {
+        pushd ${src}
+        export ${TARGET_VARS}
+	    PATH_ORIG=${PATH}
+	    export PATH=${TARGET_ROOT}/bin:${PATH}
+        make -j4 -l || exit 1
+        make install DESTDIR=${TARGET_SYSROOT}/usr || exit 1
+        make clean
+   		export PATH=${PATH_ORIG}
+        popd
+        touch .${src}.${TARGET}.ok
+    }
+) || exit 1
 
 echo "========================================================================="
 echo "Building sqlite3 for target ..."
@@ -421,6 +444,14 @@ echo "Building Luajit for target ..."
 echo "========================================================================="
 echo "Building tcpdump for target ..."
 ac_cv_linux_vers=3.0 build_target_app tcpdump-4.3.0
+
+echo "========================================================================="
+echo "Make links for arm-linux ..."
+(
+    pushd "${TARGET_ROOT}/bin"
+    find . -type f -exec bash -c "ln -s {} \$(echo {} | sed 's/${TARGET}/arm-linux/')" \; || exit 1
+    popd
+) || exit 1
 
 echo "========================================================================="
 echo "Strip all target binaries ..."
