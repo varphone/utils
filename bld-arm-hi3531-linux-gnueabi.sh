@@ -366,7 +366,7 @@ echo "Building zlib for target ..."
     src=zlib-1.2.8
 	[ -d "${src}" ] || exit 1
     [ -f .${src}.${TARGET}.ok ] || {
-        pushd zlib-1.2.8
+        pushd ${src}
         export ${TARGET_VARS}
 	    PATH_ORIG=${PATH}
 	    export PATH=${TARGET_ROOT}/bin:${PATH}
@@ -409,7 +409,7 @@ echo "Building Luajit for target ..."
         export ${TARGET_VARS}
 	    PATH_ORIG=${PATH}
 	    export PATH=${TARGET_ROOT}/bin:${PATH}
-        make HOST_CC="gcc -m32" CROSS=${TARGET}- PREFIX=/usr
+        make HOST_CC="gcc -m32" CROSS=${TARGET}-
         make install PREFIX=/usr DESTDIR="${TARGET_SYSROOT}"
         make clean
    		export PATH=${PATH_ORIG}
@@ -421,6 +421,14 @@ echo "Building Luajit for target ..."
 echo "========================================================================="
 echo "Building tcpdump for target ..."
 ac_cv_linux_vers=3.0 build_target_app tcpdump-4.3.0
+
+echo "========================================================================="
+echo "Make links for arm-linux ..."
+(
+    pushd "${TARGET_ROOT}/bin"
+    find . -type f -exec bash -c "ln -s {} \$(echo {} | sed 's/${TARGET}/arm-linux/')" \; || exit 1
+    popd
+) || exit 1
 
 echo "========================================================================="
 echo "Strip all target binaries ..."
