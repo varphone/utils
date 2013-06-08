@@ -5,7 +5,7 @@
 # Require:
 #   Host: gcc >= 4.5, autotools, flex, bison, gmp-5.1.1, mpfr-3.1.2, mpc-1.0.1,
 #         isl-0.11.2, cloog-0.18.0, libelf-0.8.13
-#   Target: linux-3.0.y, binutils-2.23.2, gcc-4.8.0, glibc-2.16, gdb-4.6, qt-4.8.4, ncurses-5.9
+#   Target: linux-3.0.y, binutils-2.23.2, gcc-4.8.1, glibc-2.17, gdb-4.6, qt-4.8.4, ncurses-5.9
 #
 # Usage:
 #   $ mkdir xxx
@@ -13,7 +13,7 @@
 #   $ bld-arm-hi3531-linux-gnueabi.sh
 #
 
-[ "$1" = "rebuild" ] && rm -f .*.ok
+TOP_BUILD_DIR=$(pwd)
 
 BUILD=i686-linux-gnu
 
@@ -41,9 +41,11 @@ TARGET_LIBS="-L${TARGET_SYSROOT}/usr/lib"
 TARGET_VARS="CC=${TARGET}-gcc CXX=${TARGET}-g++ AR=${TARGET}-ar AS=${TARGET}-as LD=${TARGET}-ld RANLIB=${TARGET}-ranlib STRIP=${TARGET}-strip"
 TARGET_TARBALLS=${TARGET_ROOT}/${TARGET}/tarballs
 
-PKG_VERSION="VCT v100 for Hi3531(gcc-4.8.0,glibc-2.16,eabi,ntpl)"
+PKG_VERSION="VCT v110 for Hi3531(gcc-4.8.1,glibc-2.17,eabi,ntpl)"
 BUGURL="mailto://varphone@foxmail.com"
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+[ "$1" = "rebuild" ] && rm -f .*${TARGET}.ok
 
 check_dirs()
 {
@@ -53,11 +55,11 @@ check_dirs()
 build_linux_headers()
 {
 	[ -d "$1" ] || exit 1
-    [ -f .$1.ok ] || {
+    [ -f .$1.${TARGET}.ok ] || {
     	pushd "$1"
 	    make headers_install ARCH=$(echo "${TARGET}" | cut -d'-' -f1) INSTALL_HDR_PATH=${TARGET_SYSROOT}/usr || exit 1
 	    popd
-        touch .$1.ok
+        touch .$1.${TARGET}.ok
     }
 }
 
@@ -138,7 +140,7 @@ build_target_lib_qt()
 build_binutils()
 {
 	[ -d "$1" ] || exit 1
-    [ -f .$1.ok ] || {
+    [ -f .$1.${TARGET}.ok ] || {
     	mkdir -p build-binutils
 	    pushd build-binutils
 	    CFLAGS="${HOST_CFLAGS} ${HOST_HEADERS}" CXXFLAGS="${HOST_CXXFLAGS} ${HOST_HEADERS}" LDFLAGS="${HOST_LDFLAGS} ${HOST_LIBS}" ../$1/configure --build=${HOST} --host=${HOST} --target=${TARGET} --disable-shared --prefix=${TARGET_ROOT} --disable-multilib --disable-ppl-version-check --disable-cloog-version-check --enable-cloog-backend=isl --with-float=softfp --with-sysroot=${TARGET_SYSROOT} || exit 1
@@ -146,14 +148,14 @@ build_binutils()
 	    make install || exit 1
 	    popd
 	    rm -rf build-binutils
-        touch .$1.ok
+        touch .$1.${TARGET}.ok
     }
 }
 
 build_gcc()
 {
 	[ -d "$1" ] || exit 1
-    [ -f .$1.$2.ok ] || {
+    [ -f .$1.$2.${TARGET}.ok ] || {
     	mkdir -p build-gcc
 	    pushd build-gcc
     	case "$2" in
@@ -177,14 +179,14 @@ build_gcc()
 	    esac
     	popd
 	    rm -rf build-gcc
-        touch .$1.$2.ok
+        touch .$1.$2.${TARGET}.ok
     }
 }
 
 build_glibc()
 {
 	[ -d "$1" ] || exit 1
-    [ -f .$1.$2.ok ] || {
+    [ -f .$1.$2.${TARGET}.ok ] || {
     	mkdir -p build-glibc
 	    pushd build-glibc
 	    case "$2" in
@@ -220,14 +222,14 @@ build_glibc()
 	    esac
 	    popd
 	    rm -rf build-glibc
-        touch .$1.$2.ok
+        touch .$1.$2.${TARGET}.ok
     }
 }
 
 build_target_busybox()
 {
 	[ -d "$1" ] || exit 1
-    [ -f .$1.$2.ok ] || {
+    [ -f .$1.$2.${TARGET}.ok ] || {
 	    pushd $1
 	    PATH_ORIG=${PATH}
 	    export PATH=${TARGET_ROOT}/bin:${PATH}
@@ -240,7 +242,7 @@ build_target_busybox()
 		make distclean
   		export PATH=${PATH_ORIG}
 		popd
-		touch .$1.$2.ok
+		touch .$1.$2.${TARGET}.ok
 	}
 }
 
@@ -290,12 +292,12 @@ build_host_lib libelf-0.8.13
 echo "========================================================================="
 echo "Building cross toolchain ..."
 build_binutils binutils-2.23.2
-build_gcc gcc-4.8.0 stage1
-build_glibc glibc-2.16.0 stage1
-build_gcc gcc-4.8.0 stage2
-build_glibc glibc-2.16.0 stage2
-build_gcc gcc-4.8.0 stage3
-build_glibc glibc-2.16.0 stage3
+build_gcc gcc-4.8.1 stage1
+build_glibc glibc-2.17 stage1
+build_gcc gcc-4.8.1 stage2
+build_glibc glibc-2.17 stage2
+build_gcc gcc-4.8.1 stage3
+build_glibc glibc-2.17 stage3
 
 echo "========================================================================="
 echo "Building libelf for target ..."
@@ -314,6 +316,10 @@ echo "Building gdb for target ..."
 	EXTRA_CFLAGS="-I${TARGET_SYSROOT}/usr/include/ncurses"
 	build_target_app gdb-7.6
 )
+
+echo "========================================================================="
+echo "Building libav for target ..."
+build_target_app libav-9.6
 
 echo "========================================================================="
 echo "Building ltrace for target ..."
@@ -345,16 +351,44 @@ echo "Building gettext for target ..."
 build_target_lib gettext-0.18.2
 
 echo "========================================================================="
+echo "Building jansson for target ..."
+build_target_lib jansson-2.4
+
+echo "========================================================================="
+echo "Building libevent for target ..."
+EXTRA_CONF="--disable-openssl --disable-debug-mode --enable-function-sections" build_target_lib libevent-2.1.3-alpha
+
+echo "========================================================================="
 echo "Building libpcap for target ..."
 EXTRA_CONF="--with-pcap=linux" build_target_lib libpcap-1.3.0
 
 echo "========================================================================="
-echo "Building readline for target ..."
-build_target_lib readline-6.2
+echo "Building openssl for target ..."
+(
+    src=openssl-1.0.1e
+	[ -d "${src}" ] || exit 1
+    [ -f .${src}.${TARGET}.ok ] || {
+        pushd ${src}
+        export ${TARGET_VARS}
+	    PATH_ORIG=${PATH}
+	    export PATH=${TARGET_ROOT}/bin:${PATH}
+        ./Configure --prefix=/usr no-asm shared linux-elf
+        make || exit 1
+        make install INSTALL_PREFIX=${TARGET_SYSROOT} || exit 1
+        make clean
+   		export PATH=${PATH_ORIG}
+        popd
+        touch .${src}.${TARGET}.ok
+    }
+) || exit 1
 
 echo "========================================================================="
 echo "Building pcre for target ..."
 build_target_lib pcre-8.32
+
+echo "========================================================================="
+echo "Building readline for target ..."
+build_target_lib readline-6.2
 
 echo "========================================================================="
 echo "Building sqlite3 for target ..."
@@ -374,6 +408,23 @@ echo "Building zlib for target ..."
         make -j4 -l || exit 1
         make install || exit 1
         make clean
+   		export PATH=${PATH_ORIG}
+        popd
+        touch .${src}.${TARGET}.ok
+    }
+) || exit 1
+
+echo "========================================================================="
+echo "Building boost for target ..."
+(
+    src=boost_1_53_0
+	[ -d "${src}" ] || exit 1
+    [ -f .${src}.${TARGET}.ok ] || {
+        pushd ${src}
+        export ${TARGET_VARS}
+	    PATH_ORIG=${PATH}
+	    export PATH=${TARGET_ROOT}/bin:${PATH}
+        ./b2 toolset=gcc-arm variant=release link=static runtime-link=static --prefix=${TARGET_SYSROOT}/usr --without-mpi -sZLIB_SOURCE=${TOP_BUILD_DIR}/zlib-1.2.8 -sBZIP2_SOURCE=${TOP_BUILD_DIR}/bzip2-1.0.6 install
    		export PATH=${PATH_ORIG}
         popd
         touch .${src}.${TARGET}.ok
@@ -436,6 +487,34 @@ ${TARGET_ROOT}/bin/${TARGET}-strip ${TARGET_SYSROOT}/usr/bin/*
 ${TARGET_ROOT}/bin/${TARGET}-strip ${TARGET_SYSROOT}/usr/sbin/*
 
 echo "========================================================================="
+echo "Fix perms of target libraries ..."
+find ${TARGET_SYSROOT}/lib -type d -exec chmod 0775 {} \;
+find ${TARGET_SYSROOT}/lib -type f -exec chmod 0664 {} \;
+find ${TARGET_SYSROOT}/usr/lib -type d -exec chmod 0775 {} \;
+find ${TARGET_SYSROOT}/usr/lib -type f -exec chmod 0664 {} \;
+find ${TARGET_SYSROOT}/usr/share -type d -exec chmod 0775 {} \;
+find ${TARGET_SYSROOT}/usr/share -type f -exec chmod 0664 {} \;
+
+echo "========================================================================="
+echo "Change timestamp of target files ..."
+d=$(date "+%F %T")
+find ${TARGET_ROOT} -exec touch -h -d "$d" {} \;
+
+echo "Generate installation fixing tool ..."
+echo "========================================================================="
+cat > ${TARGET_ROOT}/fix-install.sh << EOF
+#!/bin/bash
+
+p1=${TARGET_ROOT}/
+p2=\$(pwd)/
+
+pp1=\$(echo "\${p1}" | sed 's/\//\\\\\\//g')
+pp2=\$(echo "\${p2}" | sed 's/\//\\\\\\//g')
+
+find . -name "*.la" -exec sed -i "s/\${pp1}/\${pp2}/g" {} \;
+EOF
+echo a+x ${TARGET_ROOT}/fix-install.sh
+
 echo "Packing for glibc and stdc++ runtime libraries ..."
 pack_runtime_libs
 
