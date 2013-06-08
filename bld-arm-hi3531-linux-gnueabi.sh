@@ -30,11 +30,11 @@ HOST_VARS="CC=${HOST}-gcc CXX=${HOST}-g++ AR=${HOST}-ar AS=${HOST}-as LD=${HOST}
 TARGET=arm-hi3531-linux-gnueabi
 TARGET_ROOT=${HOME}/workspace/toolchain/${TARGET}
 TARGET_SYSROOT=${TARGET_ROOT}/${TARGET}/sysroot
-#TARGET_CFLAGS="-Os -g -pipe -mlittle-endian -march=armv7-a -mcpu=cortex-a9 -mfloat-abi=softfp -mfpu=vfpv3-d16"
-#TARGET_CXXFLAGS="-Os -g -pipe -mlittle-endian -march=armv7-a -mcpu=cortex-a9 -mfloat-abi=softfp -mfpu=vfpv3-d16"
+#TARGET_CFLAGS="-O2 -g -pipe -mlittle-endian -march=armv7-a -mcpu=cortex-a9 -mfloat-abi=softfp -mfpu=vfpv3-d16"
+#TARGET_CXXFLAGS="-O2 -g -pipe -mlittle-endian -march=armv7-a -mcpu=cortex-a9 -mfloat-abi=softfp -mfpu=vfpv3-d16"
 #TARGET_LDFLAGS="-Wl,-EL"
-TARGET_CFLAGS="-Os -g -pipe"
-TARGET_CXXFLAGS="-Os -g -pipe"
+TARGET_CFLAGS="-O2 -g -pipe"
+TARGET_CXXFLAGS="-O2 -g -pipe"
 TARGET_LDFLAGS="-Wl,-EL"
 TARGET_HEADERS="-I${TARGET_SYSROOT}/usr/include"
 TARGET_LIBS="-L${TARGET_SYSROOT}/usr/lib"
@@ -291,7 +291,7 @@ build_host_lib libelf-0.8.13
 
 echo "========================================================================="
 echo "Building cross toolchain ..."
-build_binutils binutils-2.23.2
+build_binutils binutils-2.23.52
 build_gcc gcc-4.8.1 stage1
 build_glibc glibc-2.17 stage1
 build_gcc gcc-4.8.1 stage2
@@ -319,7 +319,7 @@ echo "Building gdb for target ..."
 
 echo "========================================================================="
 echo "Building libav for target ..."
-build_target_app libav-9.6
+EXTRA_CONF="--cc=${TARGET}-gcc --enable-gpl --enable-pthreads --enable-cross-compile --host-cc=gcc --arch=arm --target-os=linux" build_target_app libav-9.6
 
 echo "========================================================================="
 echo "Building ltrace for target ..."
