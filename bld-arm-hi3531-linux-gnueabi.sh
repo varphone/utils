@@ -5,7 +5,7 @@
 # Require:
 #   Host: gcc >= 4.5, autotools, flex, bison, gmp-5.1.1, mpfr-3.1.2, mpc-1.0.1,
 #         isl-0.11.2, cloog-0.18.0, libelf-0.8.13
-#   Target: linux-3.0.y, binutils-2.23.2, gcc-4.8.1, glibc-2.17, gdb-4.6, qt-4.8.4, ncurses-5.9
+#   Target: linux-3.0.y, binutils-2.23.52, gcc-4.8.1, glibc-2.17, gdb-4.6, qt-4.8.4, ncurses-5.9
 #
 # Usage:
 #   $ mkdir xxx
@@ -160,7 +160,7 @@ build_gcc()
 	    pushd build-gcc
     	case "$2" in
 	    	stage1)
-	    		CC_FOR_BUILD=${HOST}-gcc CFLAGS="${HOST_CFLAGS} ${HOST_HEADERS}" CXXFLAGS="${HOST_CXXFLAGS} ${HOST_HEADERS}" LDFLAGS="${HOST_LDFLAGS} ${HOST_LIBS}" ../$1/configure --build=${HOST} --host=${HOST} --target=${TARGET} --prefix=${TARGET_ROOT} --disable-shared --disable-threads --disable-multilib --disable-isl-version-check --enable-languages=c,c++ --enable-__cxa_atexit --enable-target-optspace --with-float=softfp --with-newlib --with-libelf=${HOST_SYSROOT} --with-local-prefix=${TARGET_SYSROOT} --with-sysroot=${TARGET_SYSROOT} --with-host-libstdcxx="-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm" --without-headers || exit 1
+	    		CC_FOR_BUILD=${HOST}-gcc CFLAGS="${HOST_CFLAGS} ${HOST_HEADERS}" CXXFLAGS="${HOST_CXXFLAGS} ${HOST_HEADERS}" LDFLAGS="${HOST_LDFLAGS} ${HOST_LIBS}" ../$1/configure --build=${HOST} --host=${HOST} --target=${TARGET} --prefix=${TARGET_ROOT} --disable-shared --disable-threads --disable-multilib --disable-isl-version-check --enable-languages=c,c++ --enable-__cxa_atexit --with-float=softfp --with-newlib --with-libelf=${HOST_SYSROOT} --with-local-prefix=${TARGET_SYSROOT} --with-sysroot=${TARGET_SYSROOT} --with-host-libstdcxx="-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm" --without-headers || exit 1
 	    		make -j4 -l all-gcc all-target-libgcc || exit 1
 	    		make -j4 -l install-gcc install-target-libgcc || exit 1
 	    		;;
@@ -170,7 +170,7 @@ build_gcc()
 	    		make -j4 -l install-gcc install-target-libgcc || exit 1
 	    		;;
 	    	stage3)
-	    		CC_FOR_BUILD=${HOST}-gcc CFLAGS="${HOST_CFLAGS} ${HOST_HEADERS}" CXXFLAGS="${HOST_CXXFLAGS} ${HOST_HEADERS}" LDFLAGS="${HOST_LDFLAGS} ${HOST_LIBS}" CFLAGS_FOR_TARGET="${TARGET_CFLAGS} " CXXFLAGS_FOR_TARGET="${TARGET_CXXFLAGS}" LDFLAGS_FOR_TARGET="${TARGET_LDFLAGS}" ../$1/configure --build=${HOST} --host=${HOST} --target=${TARGET} --prefix=${TARGET_ROOT} --disable-multilib --disable-isl-version-check --enable-shared --enable-threads=posix --enable-target-optspace --enable-languages=c,c++ --enable-__cxa_atexit --with-arch=armv7-a --with-cpu=cortex-a9 --with-float=softfp --with-fpu=vfpv3-d16 --with-mode=thumb --with-local-prefix=${TARGET_SYSROOT} --with-sysroot=${TARGET_SYSROOT} --with-host-libstdcxx="-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm" --with-pkgversion="${PKG_VERSION}" --with-bugurl="${BUGURL}" --without-newlib || exit 1
+	    		CC_FOR_BUILD=${HOST}-gcc CFLAGS="${HOST_CFLAGS} ${HOST_HEADERS}" CXXFLAGS="${HOST_CXXFLAGS} ${HOST_HEADERS}" LDFLAGS="${HOST_LDFLAGS} ${HOST_LIBS}" CFLAGS_FOR_TARGET="${TARGET_CFLAGS} " CXXFLAGS_FOR_TARGET="${TARGET_CXXFLAGS}" LDFLAGS_FOR_TARGET="${TARGET_LDFLAGS}" ../$1/configure --build=${HOST} --host=${HOST} --target=${TARGET} --prefix=${TARGET_ROOT} --disable-multilib --disable-isl-version-check --enable-shared --enable-threads=posix --enable-languages=c,c++ --enable-__cxa_atexit --with-arch=armv7-a --with-cpu=cortex-a9 --with-float=softfp --with-fpu=vfpv3-d16 --with-mode=thumb --with-local-prefix=${TARGET_SYSROOT} --with-sysroot=${TARGET_SYSROOT} --with-host-libstdcxx="-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm" --with-pkgversion="${PKG_VERSION}" --with-bugurl="${BUGURL}" --without-newlib || exit 1
 	    		make -j4 -l || exit 1
 	    		make -j4 -l install || exit 1
 	    		;;
@@ -193,7 +193,7 @@ build_glibc()
 	    	stage1)
 	    		PATH_ORIG=${PATH}
 	    		export PATH=${TARGET_ROOT}/bin:${PATH}
-	    		cp ../$1/Makeconfig.static ../$1/Makeconfig
+	    		#cp ../$1/Makeconfig.static ../$1/Makeconfig
 	    		CFLAGS="${TARGET_CFLAGS}" CXXFLAGS="${TARGET_CXXFLAGS}" LDFLAGS="${TARGET_LDFLAGS}" ../$1/configure --prefix=/usr --host=${TARGET} --enable-add-ons --with-headers=${TARGET_SYSROOT}/usr/include || exit 1
 	    		make -j4 -l || exit 1
 	    		make -j4 -l install_root=${TARGET_SYSROOT} install || exit 1
@@ -202,7 +202,7 @@ build_glibc()
 	    	stage2)
 	    		PATH_ORIG=${PATH}
 	    		export PATH=${TARGET_ROOT}/bin:${PATH}
-	    		cp ../$1/Makeconfig.shared ../$1/Makeconfig
+	    		#cp ../$1/Makeconfig.shared ../$1/Makeconfig
 	    		CFLAGS="${TARGET_CFLAGS}" CXXFLAGS="${TARGET_CXXFLAGS}" LDFLAGS="${TARGET_LDFLAGS}" ../$1/configure --host=${TARGET} --prefix=/usr --enable-add-ons --enable-obsolete-rpc --with-headers=${TARGET_SYSROOT}/usr/include --with-pkgversion="${PKG_VERSION}" --with-bugurl="${BUGURL}" || exit 1
 	    		make -j4 -l || exit 1
 	    		make -j4 -l install_root=${TARGET_SYSROOT} install || exit 1
@@ -211,7 +211,7 @@ build_glibc()
 	    	stage3)
 	    		PATH_ORIG=${PATH}
 	    		export PATH=${TARGET_ROOT}/bin:${PATH}
-	    		cp ../$1/Makeconfig.shared ../$1/Makeconfig
+	    		#cp ../$1/Makeconfig.shared ../$1/Makeconfig
 	    		CFLAGS="${TARGET_CFLAGS}" CXXFLAGS="${TARGET_CXXFLAGS}" LDFLAGS="${TARGET_LDFLAGS}" ../$1/configure --host=${TARGET} --prefix=/usr --enable-add-ons --enable-obsolete-rpc --with-headers=${TARGET_SYSROOT}/usr/include || exit 1
 	    		make -j4 -l || exit 1
 	    		make -j4 -l install_root=${TARGET_SYSROOT} install || exit 1
@@ -300,6 +300,14 @@ build_gcc gcc-4.8.1 stage3
 build_glibc glibc-2.17 stage3
 
 echo "========================================================================="
+echo "Make links for arm-linux ..."
+(
+    pushd "${TARGET_ROOT}/bin"
+    find . -type f -exec bash -c "ln -s {} \$(echo {} | sed 's/${TARGET}/arm-linux/')" \; || exit 1
+    popd
+)
+
+echo "========================================================================="
 echo "Building libelf for target ..."
 (
 	export ${TARGET_VARS} EXTRA_CONF="--enable-elf64";
@@ -308,7 +316,7 @@ echo "Building libelf for target ..."
 
 echo "========================================================================="
 echo "Building ncurses for target ..."
-build_target_lib ncurses-5.9
+EXTRA_CONF="--with-shared" build_target_lib ncurses-5.9
 
 echo "========================================================================="
 echo "Building gdb for target ..."
@@ -319,7 +327,7 @@ echo "Building gdb for target ..."
 
 echo "========================================================================="
 echo "Building libav for target ..."
-EXTRA_CONF="--cc=${TARGET}-gcc --enable-gpl --enable-pthreads --enable-cross-compile --host-cc=gcc --arch=arm --target-os=linux" build_target_app libav-9.6
+#EXTRA_CONF="--cc=${TARGET}-gcc --enable-gpl --enable-pthreads --enable-cross-compile --host-cc=gcc --arch=arm --target-os=linux" build_target_app libav-9.6
 
 echo "========================================================================="
 echo "Building ltrace for target ..."
@@ -472,14 +480,6 @@ echo "Building Luajit for target ..."
 echo "========================================================================="
 echo "Building tcpdump for target ..."
 ac_cv_linux_vers=3.0 build_target_app tcpdump-4.3.0
-
-echo "========================================================================="
-echo "Make links for arm-linux ..."
-(
-    pushd "${TARGET_ROOT}/bin"
-    find . -type f -exec bash -c "ln -s {} \$(echo {} | sed 's/${TARGET}/arm-linux/')" \; || exit 1
-    popd
-) || exit 1
 
 echo "========================================================================="
 echo "Strip all target binaries ..."
