@@ -44,6 +44,7 @@ TARGET_TARBALLS=${TARGET_ROOT}/${TARGET}/tarballs
 PKG_VERSION="VCT v110 for Hi3531(gcc-4.8.1,glibc-2.11.1,eabi,ntpl)"
 BUGURL="mailto://varphone@foxmail.com"
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+JOBS=-j20
 
 [ "$1" = "rebuild" ] && rm -f .*${TARGET}.ok
 
@@ -110,7 +111,7 @@ build_target_lib()
    		PATH_ORIG=${PATH}
    		export PATH=${TARGET_ROOT}/bin:${PATH}
 	    CFLAGS="${TARGET_CFLAGS} ${TARGET_HEADERS}" CXXFLAGS="${TARGET_CXXFLAGS} ${TARGET_HEADERS}" LDFLAGS="${TARGET_LDFLAGS} ${TARGET_LIBS}" ../$1/configure --host=${TARGET} --prefix=${TARGET_SYSROOT}/usr --enable-shared --enable-static ${EXTRA_CONF} || exit 1
-	    make -j4 || exit 1
+	    make ${JOBS} || exit 1
     	make install || exit 1
 	    popd
    		export PATH=${PATH_ORIG}
@@ -128,7 +129,7 @@ build_target_lib_qt()
    		PATH_ORIG=${PATH}
    		export PATH=${TARGET_ROOT}/bin:${PATH}
 	    CFLAGS="${TARGET_HEADERS}" CXXFLAGS="${TARGET_HEADERS}" LDFLAGS="${TARGET_LDFLAGS} ${TARGET_LIBS}" ../$1/configure -opensource -confirm-license -embedded arm -xplatform qws/linux-arm-hi3531-gnueabi-g++ -release -fast -little-endian -qt-sql-sqlite -plugin-sql-sqlite -qt-gfx-linuxfb -qt-zlib -qt-libtiff -qt-libpng -qt-libjpeg -no-rpath -no-pch -no-glib -no-webkit -no-qt3support -no-phonon -no-script -no-scripttools -no-declarative -no-declarative-debug -no-3dnow -no-avx -no-neon -no-openssl -no-nis -no-cups -no-dbus -no-opengl -no-libmng -nomake demos -nomake examples -nomake docs ${EXTRA_CONF} || exit 1
-	    make -j4 || exit 1
+	    make ${JOBS} || exit 1
     	make install || exit 1
 	    popd
    		export PATH=${PATH_ORIG}
@@ -144,7 +145,7 @@ build_binutils()
     	mkdir -p build-binutils
 	    pushd build-binutils
 	    CFLAGS="${HOST_CFLAGS} ${HOST_HEADERS}" CXXFLAGS="${HOST_CXXFLAGS} ${HOST_HEADERS}" LDFLAGS="${HOST_LDFLAGS} ${HOST_LIBS}" ../$1/configure --build=${HOST} --host=${HOST} --target=${TARGET} --disable-shared --prefix=${TARGET_ROOT} --disable-multilib --disable-ppl-version-check --disable-cloog-version-check --enable-cloog-backend=isl --with-float=softfp --with-sysroot=${TARGET_SYSROOT} || exit 1
-	    make -j4 || exit 1
+	    make ${JOBS} || exit 1
 	    make install || exit 1
 	    popd
 	    rm -rf build-binutils
@@ -152,6 +153,7 @@ build_binutils()
     }
 }
 
+#gcc_cv_libc_provides_ssp=yes 
 build_gcc()
 {
 	[ -d "$1" ] || exit 1
@@ -160,19 +162,19 @@ build_gcc()
 	    pushd build-gcc
     	case "$2" in
 	    	stage1)
-	    		gcc_cv_libc_provides_ssp=yes CC_FOR_BUILD=${HOST}-gcc CFLAGS="${HOST_CFLAGS} ${HOST_HEADERS}" CXXFLAGS="${HOST_CXXFLAGS} ${HOST_HEADERS}" LDFLAGS="${HOST_LDFLAGS} ${HOST_LIBS}" ../$1/configure --build=${HOST} --host=${HOST} --target=${TARGET} --prefix=${TARGET_ROOT} --enable-lto --disable-shared --disable-threads --disable-multilib --disable-isl-version-check --enable-languages=c,c++ --enable-__cxa_atexit --with-float=softfp --with-newlib --with-libelf=${HOST_SYSROOT} --with-local-prefix=${TARGET_SYSROOT} --with-sysroot=${TARGET_SYSROOT} --with-host-libstdcxx="-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm" --without-headers || exit 1
-	    		make -j4 -l all-gcc all-target-libgcc || exit 1
-	    		make -j4 -l install-gcc install-target-libgcc || exit 1
+	    		gcc_cv_libc_provides_ssp=no CC_FOR_BUILD=${HOST}-gcc CFLAGS="${HOST_CFLAGS} ${HOST_HEADERS}" CXXFLAGS="${HOST_CXXFLAGS} ${HOST_HEADERS}" LDFLAGS="${HOST_LDFLAGS} ${HOST_LIBS}" ../$1/configure --build=${HOST} --host=${HOST} --target=${TARGET} --prefix=${TARGET_ROOT} --enable-lto --disable-libssp --disable-shared --disable-threads --disable-multilib --disable-isl-version-check --enable-languages=c,c++ --enable-__cxa_atexit --with-float=softfp --with-newlib --with-libelf=${HOST_SYSROOT} --with-local-prefix=${TARGET_SYSROOT} --with-sysroot=${TARGET_SYSROOT} --with-host-libstdcxx="-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm" --without-headers || exit 1
+	    		make ${JOBS} -l all-gcc all-target-libgcc gcc_cv_libc_provides_ssp=no || exit 1
+	    		make ${JOBS} -l install-gcc install-target-libgcc || exit 1
 	    		;;
 	    	stage2)
-	    		CC_FOR_BUILD=${HOST}-gcc CFLAGS="${HOST_CFLAGS} ${HOST_HEADERS}" CXXFLAGS="${HOST_CXXFLAGS} ${HOST_HEADERS}" LDFLAGS="${HOST_LDFLAGS} ${HOST_LIBS}" ../$1/configure --build=${HOST} --host=${HOST} --target=${TARGET} --prefix=${TARGET_ROOT} --enable-shared --enable-threads=posix --disable-multilib --disable-isl-version-check --enable-languages=c,c++ --enable-__cxa_atexit --with-arch=armv7-a --with-cpu=cortex-a9 --with-float=softfp --with-fpu=vfpv3-d16 --with-mode=thumb --with-local-prefix=${TARGET_SYSROOT} --with-sysroot=${TARGET_SYSROOT} --with-host-libstdcxx="-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm" --with-pkgversion="${PKG_VERSION}" --with-bugurl="${BUGURL}" --without-newlib || exit 1
-	    		make -j4 -l all-gcc all-target-libgcc || exit 1
-	    		make -j4 -l install-gcc install-target-libgcc || exit 1
+	    		gcc_cv_libc_provides_ssp=no CC_FOR_BUILD=${HOST}-gcc CFLAGS="${HOST_CFLAGS} ${HOST_HEADERS}" CXXFLAGS="${HOST_CXXFLAGS} ${HOST_HEADERS}" LDFLAGS="${HOST_LDFLAGS} ${HOST_LIBS}" ../$1/configure --build=${HOST} --host=${HOST} --target=${TARGET} --prefix=${TARGET_ROOT} --disable-multilib --disable-isl-version-check --enable-lto --enable-shared --enable-threads=posix --enable-languages=c,c++ --enable-__cxa_atexit --with-arch=armv7-a --with-cpu=cortex-a9 --with-float=softfp --with-fpu=vfpv3-d16 --with-mode=thumb --with-local-prefix=${TARGET_SYSROOT} --with-sysroot=${TARGET_SYSROOT} --with-host-libstdcxx="-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm" --with-pkgversion="${PKG_VERSION}" --with-bugurl="${BUGURL}" --without-newlib || exit 1
+	    		make ${JOBS} -l all-gcc all-target-libgcc gcc_cv_libc_provides_ssp=no || exit 1
+	    		make ${JOBS} -l install-gcc install-target-libgcc || exit 1
 	    		;;
 	    	stage3)
-	    		CC_FOR_BUILD=${HOST}-gcc CFLAGS="${HOST_CFLAGS} ${HOST_HEADERS}" CXXFLAGS="${HOST_CXXFLAGS} ${HOST_HEADERS}" LDFLAGS="${HOST_LDFLAGS} ${HOST_LIBS}" CFLAGS_FOR_TARGET="${TARGET_CFLAGS} " CXXFLAGS_FOR_TARGET="${TARGET_CXXFLAGS}" LDFLAGS_FOR_TARGET="${TARGET_LDFLAGS}" ../$1/configure --build=${HOST} --host=${HOST} --target=${TARGET} --prefix=${TARGET_ROOT} --disable-multilib --disable-isl-version-check --enable-shared --enable-threads=posix --enable-languages=c,c++ --enable-__cxa_atexit --with-arch=armv7-a --with-cpu=cortex-a9 --with-float=softfp --with-fpu=vfpv3-d16 --with-mode=thumb --with-local-prefix=${TARGET_SYSROOT} --with-sysroot=${TARGET_SYSROOT} --with-host-libstdcxx="-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm" --with-pkgversion="${PKG_VERSION}" --with-bugurl="${BUGURL}" --without-newlib || exit 1
-	    		make -j4 -l || exit 1
-	    		make -j4 -l install || exit 1
+	    		gcc_cv_libc_provides_ssp=no CC_FOR_BUILD=${HOST}-gcc CFLAGS="${HOST_CFLAGS} ${HOST_HEADERS}" CXXFLAGS="${HOST_CXXFLAGS} ${HOST_HEADERS}" LDFLAGS="${HOST_LDFLAGS} ${HOST_LIBS}" CFLAGS_FOR_TARGET="${TARGET_CFLAGS} " CXXFLAGS_FOR_TARGET="${TARGET_CXXFLAGS}" LDFLAGS_FOR_TARGET="${TARGET_LDFLAGS}" ../$1/configure --build=${HOST} --host=${HOST} --target=${TARGET} --prefix=${TARGET_ROOT} --disable-multilib --disable-isl-version-check --enable-lto --enable-shared --enable-threads=posix --enable-languages=c,c++ --enable-__cxa_atexit --with-arch=armv7-a --with-cpu=cortex-a9 --with-float=softfp --with-fpu=vfpv3-d16 --with-mode=thumb --with-local-prefix=${TARGET_SYSROOT} --with-sysroot=${TARGET_SYSROOT} --with-host-libstdcxx="-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm" --with-pkgversion="${PKG_VERSION}" --with-bugurl="${BUGURL}" --without-newlib || exit 1
+	    		make ${JOBS} -l gcc_cv_libc_provides_ssp=no || exit 1
+	    		make ${JOBS} -l install || exit 1
 	    		;;
 	    	*)
 	    		;;
@@ -193,28 +195,28 @@ build_glibc()
 	    	stage1)
 	    		PATH_ORIG=${PATH}
 	    		export PATH=${TARGET_ROOT}/bin:${PATH}
-	    		cp ../$1/Makeconfig.static ../$1/Makeconfig
-	    		libc_cv_forced_unwind=yes libc_cv_c_cleanup=yes libc_cv_ssp=yes CFLAGS="${TARGET_CFLAGS}" CXXFLAGS="${TARGET_CXXFLAGS}" LDFLAGS="${TARGET_LDFLAGS}" ../$1/configure --prefix=/usr --host=${TARGET} --enable-add-ons --with-headers=${TARGET_SYSROOT}/usr/include || exit 1
-	    		make -j4 -l libc_cv_forced_unwind=yes libc_cv_c_cleanup=yes libc_cv_ssp=no || exit 1
-	    		make -j4 -l install_root=${TARGET_SYSROOT} install || exit 1
+	    		cp ../$1/Makeconfig.shared ../$1/Makeconfig
+	    		libc_cv_forced_unwind=yes libc_cv_c_cleanup=yes libc_cv_ssp=no CFLAGS="${TARGET_CFLAGS}" CXXFLAGS="${TARGET_CXXFLAGS}" LDFLAGS="${TARGET_LDFLAGS}" ../$1/configure --prefix=/usr --host=${TARGET} --enable-add-ons --enable-static --enable-shared --with-headers=${TARGET_SYSROOT}/usr/include || exit 1
+	    		make ${JOBS} -l libc_cv_forced_unwind=yes libc_cv_c_cleanup=yes libc_cv_ssp=no || exit 1
+	    		make ${JOBS} -l install_root=${TARGET_SYSROOT} install || exit 1
 	    		export PATH=${PATH_ORIG}
     			;;
 	    	stage2)
 	    		PATH_ORIG=${PATH}
 	    		export PATH=${TARGET_ROOT}/bin:${PATH}
 	    		cp ../$1/Makeconfig.shared ../$1/Makeconfig
-	    		libc_cv_forced_unwind=yes libc_cv_c_cleanup=yes libc_cv_ssp=yes CFLAGS="${TARGET_CFLAGS}" CXXFLAGS="${TARGET_CXXFLAGS}" LDFLAGS="${TARGET_LDFLAGS}" ../$1/configure --host=${TARGET} --prefix=/usr --enable-add-ons --enable-obsolete-rpc --with-headers=${TARGET_SYSROOT}/usr/include --with-pkgversion="${PKG_VERSION}" --with-bugurl="${BUGURL}" || exit 1
-	    		make -j4 -l libc_cv_forced_unwind=yes libc_cv_c_cleanup=yes libc_cv_ssp=yes || exit 1
-	    		make -j4 -l install_root=${TARGET_SYSROOT} install || exit 1
+	    		libc_cv_forced_unwind=yes libc_cv_c_cleanup=yes libc_cv_ssp=no CFLAGS="${TARGET_CFLAGS}" CXXFLAGS="${TARGET_CXXFLAGS}" LDFLAGS="${TARGET_LDFLAGS}" ../$1/configure --host=${TARGET} --prefix=/usr --enable-add-ons --enable-shared --enable-obsolete-rpc --with-headers=${TARGET_SYSROOT}/usr/include --with-pkgversion="${PKG_VERSION}" --with-bugurl="${BUGURL}" || exit 1
+	    		make ${JOBS} -l libc_cv_forced_unwind=yes libc_cv_c_cleanup=yes libc_cv_ssp=no || exit 1
+	    		make ${JOBS} -l install_root=${TARGET_SYSROOT} install || exit 1
 	    		export PATH=${PATH_ORIG}
 	    		;;
 	    	stage3)
 	    		PATH_ORIG=${PATH}
 	    		export PATH=${TARGET_ROOT}/bin:${PATH}
 	    		cp ../$1/Makeconfig.shared ../$1/Makeconfig
-	    		libc_cv_forced_unwind=yes libc_cv_c_cleanup=yes libc_cv_ssp=yes CFLAGS="${TARGET_CFLAGS}" CXXFLAGS="${TARGET_CXXFLAGS}" LDFLAGS="${TARGET_LDFLAGS}" ../$1/configure --host=${TARGET} --prefix=/usr --enable-add-ons --enable-obsolete-rpc --with-headers=${TARGET_SYSROOT}/usr/include || exit 1
-	    		make -j4 -l libc_cv_forced_unwind=yes libc_cv_c_cleanup=yes libc_cv_ssp=yes || exit 1
-	    		make -j4 -l install_root=${TARGET_SYSROOT} install || exit 1
+	    		libc_cv_forced_unwind=yes libc_cv_c_cleanup=yes libc_cv_ssp=no CFLAGS="${TARGET_CFLAGS}" CXXFLAGS="${TARGET_CXXFLAGS}" LDFLAGS="${TARGET_LDFLAGS}" ../$1/configure --host=${TARGET} --prefix=/usr --enable-add-ons --enable-obsolete-rpc --with-headers=${TARGET_SYSROOT}/usr/include || exit 1
+	    		make ${JOBS} -l libc_cv_forced_unwind=yes libc_cv_c_cleanup=yes libc_cv_ssp=no || exit 1
+	    		make ${JOBS} -l install_root=${TARGET_SYSROOT} install || exit 1
 	    		export PATH=${PATH_ORIG}
 	    		;;
 	    	*)
@@ -234,7 +236,7 @@ build_target_busybox()
 	    PATH_ORIG=${PATH}
 	    export PATH=${TARGET_ROOT}/bin:${PATH}
 		make $2
-		make -j4 -l || exit 1
+		make ${JOBS} -l || exit 1
 		make install || exit 1
 		pushd _install
 		fakeroot tar zcvf "${TARGET_TARBALLS}/$1.tgz" *
@@ -293,6 +295,8 @@ echo "========================================================================="
 echo "Building cross toolchain ..."
 build_binutils binutils-2.23.52
 build_gcc gcc-4.8.1 stage1
+libgcc_eh=`${TARGET_ROOT}/bin/${TARGET}-gcc -print-libgcc-file-name | sed 's/libgcc/&_eh/'`
+test -e "${libgcc_eh}" || ln -sv libgcc.a "${libgcc_eh}"
 build_glibc glibc-2.11.1 stage1
 build_gcc gcc-4.8.1 stage2
 build_glibc glibc-2.11.1 stage2
@@ -303,7 +307,7 @@ echo "========================================================================="
 echo "Make links for arm-linux ..."
 (
     pushd "${TARGET_ROOT}/bin"
-    find . -type f -exec bash -c "ln -s {} \$(echo {} | sed 's/${TARGET}/arm-linux/')" \; || exit 1
+    find . -type f -exec bash -c "ln -sf {} \$(echo {} | sed 's/${TARGET}/arm-linux/')" \; || exit 1
     popd
 )
 
@@ -315,36 +319,28 @@ echo "Building libelf for target ..."
 )
 
 echo "========================================================================="
+echo "Building apr for target ..."
+(
+    src=apr-1.4.6
+	[ -d "${src}" ] || exit 1
+    [ -f .${src}.${TARGET}.ok ] || {
+        pushd ${src}
+        export ${TARGET_VARS}
+	    PATH_ORIG=${PATH}
+	    export PATH=${TARGET_ROOT}/bin:${PATH}
+		ac_cv_func_mmap=yes ac_cv_file__dev_zero=yes ac_cv_func_setpgrp_void=yes apr_cv_tcp_nodelay_with_cork=yes ./configure --prefix=${TARGET_SYSROOT}/usr --host=${TARGET} --enable-shared --enable-static
+        make ${JOBS} || exit 1
+		make install || exit 1
+        make distclean
+   		export PATH=${PATH_ORIG}
+        popd
+        touch .${src}.${TARGET}.ok
+	}
+) || exit 1
+
+echo "========================================================================="
 echo "Building ncurses for target ..."
 EXTRA_CONF="--with-shared" build_target_lib ncurses-5.9
-
-echo "========================================================================="
-echo "Building gdb for target ..."
-(
-	EXTRA_CFLAGS="-I${TARGET_SYSROOT}/usr/include/ncurses"
-	build_target_app gdb-7.6
-)
-
-echo "========================================================================="
-echo "Building libav for target ..."
-#EXTRA_CONF="--cc=${TARGET}-gcc --enable-gpl --enable-pthreads --enable-cross-compile --host-cc=gcc --arch=arm --target-os=linux" build_target_app libav-9.6
-
-echo "========================================================================="
-echo "Building ltrace for target ..."
-#EXTRA_CFLAGS="-D__LIBELF64=1" EXTRA_CONF="--enable-werror=no" build_target_app ltrace-0.7.2
-
-echo "========================================================================="
-echo "Building qt for target ..."
-(
-	EXTRA_CONF="-shared -prefix ${TARGET_SYSROOT}/usr/local/qt-4.8.4"
-	build_target_lib_qt qt-everywhere-opensource-src-4.8.4
-    fix_install=${TARGET_SYSROOT}/usr/local/qt-4.8.4/fix_install.sh
-    echo "/bin/bash" > ${fix_install}
-    echo "echo \"/bin/bash\" > bin/qt.conf" >> ${fix_install}
-    echo "echo \"[Paths]\" >> bin/qt.conf" >> ${fix_install}
-    echo "echo \"Prefix=\$(pwd)\" >> bin/qt.conf" >> ${fix_install}
-    chmod a+x ${fix_install}
-) || exit 1
 
 echo "========================================================================="
 echo "Building freetype2 for target ..."
@@ -381,8 +377,8 @@ echo "Building openssl for target ..."
 	    PATH_ORIG=${PATH}
 	    export PATH=${TARGET_ROOT}/bin:${PATH}
         ./Configure --prefix=/usr no-asm shared linux-elf
-        make || exit 1
-        make install INSTALL_PREFIX=${TARGET_SYSROOT} || exit 1
+        make ${JOBS} || exit 1
+        make ${JOBS} install INSTALL_PREFIX=${TARGET_SYSROOT} || exit 1
         make clean
    		export PATH=${PATH_ORIG}
         popd
@@ -413,7 +409,7 @@ echo "Building zlib for target ..."
 	    PATH_ORIG=${PATH}
 	    export PATH=${TARGET_ROOT}/bin:${PATH}
         ./configure --prefix=${TARGET_SYSROOT}/usr
-        make -j4 -l || exit 1
+        make ${JOBS} -l || exit 1
         make install || exit 1
         make clean
    		export PATH=${PATH_ORIG}
@@ -432,12 +428,56 @@ echo "Building boost for target ..."
         export ${TARGET_VARS}
 	    PATH_ORIG=${PATH}
 	    export PATH=${TARGET_ROOT}/bin:${PATH}
-        ./b2 toolset=gcc-arm variant=release link=static runtime-link=static --prefix=${TARGET_SYSROOT}/usr --without-mpi -sZLIB_SOURCE=${TOP_BUILD_DIR}/zlib-1.2.8 -sBZIP2_SOURCE=${TOP_BUILD_DIR}/bzip2-1.0.6 install
+        ./b2 toolset=gcc-arm variant=release link=static runtime-link=static --prefix=${TARGET_SYSROOT}/usr --without-mpi --without-python -sZLIB_SOURCE=${TOP_BUILD_DIR}/zlib-1.2.8 -sBZIP2_SOURCE=${TOP_BUILD_DIR}/bzip2-1.0.6 install
    		export PATH=${PATH_ORIG}
         popd
         touch .${src}.${TARGET}.ok
     }
 ) || exit 1
+
+echo "========================================================================="
+echo "Building libav for target ..."
+(
+    src=libav-9.6
+	[ -d "${src}" ] || exit 1
+    [ -f .${src}.${TARGET}.ok ] || {
+        pushd ${src}
+        export ${TARGET_VARS}
+	    PATH_ORIG=${PATH}
+	    export PATH=${TARGET_ROOT}/bin:${PATH}
+        ./configure --prefix=${TARGET_SYSROOT}/usr --cc=${TARGET}-gcc --enable-gpl --enable-pthreads --enable-cross-compile --host-cc=gcc --arch=arm --target-os=linux || exit 1
+        make ${JOBS} -l || exit 1
+        make install || exit 1
+        make clean
+   		export PATH=${PATH_ORIG}
+        popd
+        touch .${src}.${TARGET}.ok
+    }
+) || exit 1
+
+echo "========================================================================="
+echo "Building ltrace for target ..."
+#EXTRA_CFLAGS="-D__LIBELF64=1" EXTRA_CONF="--enable-werror=no" build_target_app ltrace-0.7.2
+
+echo "========================================================================="
+echo "Building qt for target ..."
+(
+	EXTRA_CONF="-shared -prefix ${TARGET_SYSROOT}/usr/local/qt-4.8.4"
+	build_target_lib_qt qt-everywhere-opensource-src-4.8.4
+    fix_install=${TARGET_SYSROOT}/usr/local/qt-4.8.4/fix_install.sh
+    echo "/bin/bash" > ${fix_install}
+    echo "echo \"/bin/bash\" > bin/qt.conf" >> ${fix_install}
+    echo "echo \"[Paths]\" >> bin/qt.conf" >> ${fix_install}
+    echo "echo \"Prefix=\$(pwd)\" >> bin/qt.conf" >> ${fix_install}
+    chmod a+x ${fix_install}
+) || exit 1
+
+echo "========================================================================="
+echo "Building gdb for target ..."
+(
+	EXTRA_CFLAGS="-I${TARGET_SYSROOT}/usr/include/ncurses"
+	build_target_app gdb-7.6
+)
 
 echo "========================================================================="
 echo "Building busybox for target ..."
@@ -480,6 +520,26 @@ echo "Building Luajit for target ..."
 echo "========================================================================="
 echo "Building tcpdump for target ..."
 ac_cv_linux_vers=3.0 build_target_app tcpdump-4.3.0
+
+echo "========================================================================="
+echo "Building valgrind for target ..."
+(
+    src=valgrind-3.8.1
+	[ -d "${src}" ] || exit 1
+    [ -f .${src}.${TARGET}.ok ] || {
+        pushd ${src}
+        export ${TARGET_VARS}
+	    PATH_ORIG=${PATH}
+	    export PATH=${TARGET_ROOT}/bin:${PATH}
+		./configure --host=${TARGET} --prefix=${TARGET_SYSROOT}/usr || exit
+        make ${JOBS} || exit
+        make install
+        make clean
+   		export PATH=${PATH_ORIG}
+        popd
+        touch .${src}.${TARGET}.ok
+    }
+) || exit 1
 
 echo "========================================================================="
 echo "Strip all target binaries ..."
